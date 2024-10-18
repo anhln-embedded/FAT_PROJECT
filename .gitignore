@@ -53,3 +53,5 @@ dkms.conf
 
 # Ignore file img
 *.img
+
+test/*
