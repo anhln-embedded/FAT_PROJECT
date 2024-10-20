@@ -11,7 +11,7 @@ OBJ = $(SRC:.c=.o)
 $(TARGET): $(OBJ)
 	if not exist output mkdir output
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
-	$(TARGET) 
+	$(TARGET) floppy.img
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -21,4 +21,4 @@ clean:
 	rmdir /S /Q output
 
 run: $(TARGET)
-	$(TARGET)
+	$(TARGET) floppy.img

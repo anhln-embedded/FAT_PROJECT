@@ -2,14 +2,15 @@
 #include <stdio.h>
 #include <stdint.h>
 
-void removeSpaces(char* str);
 
+uint32_t getRootDirStart(const BootSector_t *bs){
+    uint32_t rootDirSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16);
+    return rootDirSector * bs->bytesPerSector;
+}
 
 void read_root_directory(FILE *fp, const BootSector_t *bs){
-    uint32_t rootDirSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16);
-    uint32_t rootDirStart = rootDirSector * bs->bytesPerSector;
-
-    fseek(fp, rootDirStart, SEEK_SET);
+    
+    fseek(fp, getRootDirStart(bs), SEEK_SET);
 
     int i; 
     for(i =0; i < bs->rootEntryCount; i++){
@@ -35,14 +36,4 @@ void read_root_directory(FILE *fp, const BootSector_t *bs){
     }
 }
 
-void removeSpaces(char* str) {
-    char* i = str;
-    char* j = str;
-    while(*j != 0) {
-        *i = *j++;
-        if(*i != ' ') {
-            i++;
-        }
-    }
-    *i = 0;
-}
+

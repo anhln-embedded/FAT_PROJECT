@@ -41,7 +41,13 @@ typedef struct {
     uint32_t fileSize;            
 } DirectoryEntry;
 
+struct X{
+    DirectoryEntry a;
+    DirectoryEntry *prev;
+};
+
 void read_root_directory(FILE *fp, const BootSector_t *bs);
+uint32_t getRootDirStart(const BootSector_t *bs);
 
 #ifdef __cplusplus
 }
