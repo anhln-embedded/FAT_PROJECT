@@ -1,11 +1,7 @@
-#include    <stdint.h>
-#include    <stdio.h>
-#include    <string.h>
 #include    "readClusterData.h"
 
-
 // Hàm đọc và hiển thị nội dung của một folder
-void readFolder(uint16_t startCluster, FILE *fp) 
+void readFolder(uint16_t startCluster, FILE *fp)
 {
     DirectoryEntry folder[ENTRIES_PER_CLUSTER];  // Giả định rằng ta đã nạp nội dung vào folder /// đưa dữ liệu vào folder[16] -- 16 là tổng số entries tối đa trong một cl
     // đưa data từ cluster vào folder
@@ -21,7 +17,6 @@ void readFolder(uint16_t startCluster, FILE *fp)
         folder[i] = *entryTemp;
     }
 
-
 ////////////////////////////////
 
     printf("Reading folder starting at cluster: %d\n", startCluster);
@@ -29,12 +24,12 @@ void readFolder(uint16_t startCluster, FILE *fp)
     // Duyệt qua các entry trong thư mục
     for (int i = 0; i < 16; i++) {
         DirectoryEntry entry = folder[i];
-        
+
         // Nếu entry có tên rỗng, có nghĩa là hết danh sách các mục trong thư mục
         if (entry.name[0] == 0x00) {
             break;
         }
-        
+
         // Kiểm tra nếu entry bị đánh dấu xóa
         if (entry.name[0] == 0xE5) {
             continue;
@@ -42,7 +37,7 @@ void readFolder(uint16_t startCluster, FILE *fp)
 
         // Hiển thị tên tệp hoặc thư mục
         printf("Name: %.8s", entry.name);
-        
+
         if (!(entry.attr & ATTR_DIRECTORY)) {
             printf(".%.3s", entry.ext);  // Hiển thị phần mở rộng nếu là tệp tin
         }
