@@ -52,10 +52,11 @@ int main(int argc, char *argv[])
                 char *content = getFileContent(fp, &bs, &entry);       
                 (void) content;
                 // free(content);
-                
+            
             }
         }
     }
+    
     fclose(fp);
     return 0;
 }

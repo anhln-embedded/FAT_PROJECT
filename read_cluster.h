@@ -27,9 +27,10 @@ typedef struct {
 } ClusterBuffer_t;
 
 uint32_t getNextCluster(FILE *fp, const BootSector_t *bs, uint32_t cluster);
+
 void read_cluster(FILE *fp, const BootSector_t *bs, uint32_t cluster, char *buffer);
 char * getFileContent(FILE *fp, const BootSector_t *bs, const DirectoryEntry *entry);
-
+DirectoryEntry *getDirectoryEntry(FILE *fp, const BootSector_t *bs, const DirectoryEntry *entry);
 
 #ifdef __cplusplus
 }

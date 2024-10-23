@@ -56,3 +56,6 @@ char * getFileContent(FILE *fp, const BootSector_t *bs, const DirectoryEntry *en
     return buffer;
 }
 
+// DirectoryEntry *getDirectoryEntry(FILE *fp, const BootSector_t *bs, const DirectoryEntry *entry){
+
+// }
