@@ -1,4 +1,5 @@
 #include "readClusterData.h"
+#include "fat_lib.h"
 
 // display contents in folder
 void readFolder(uint16_t startCluster, FILE *file)
@@ -36,7 +37,7 @@ void readFolder(uint16_t startCluster, FILE *file)
 
         printf("Name: %.8s", entry.name);
 
-        if (!(entry.attr & ATTR_DIRECTORY))
+        if (entry.attr == ATTR_DIRECTORY)
         {
             printf(".%.3s", entry.ext); // extern name
         }
@@ -72,6 +73,41 @@ void readFile(uint16_t startCluster, FILE *file)
     buffer[CLUSTER_SIZE] = '\0';
     printf("%s", buffer);
     // printf("-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-");
+}
+
+uint16_t findNameInCluster(uint16_t startCluster, char *filename, FILE *file)
+{
+    fseek(file, (startCluster + 33 - 2) * 512, SEEK_SET);
+    DirectoryEntry *entry;
+    char arr[sizeof(DirectoryEntry)];
+    uint16_t counter = 0;
+    {
+        fread(arr, sizeof(DIR_ENTRY_SIZE), 1, file);
+        entry = (DirectoryEntry *)arr;
+        if (strstr(entry->name, filename) != NULL)
+        {
+            return entry->startCluster;
+        }
+        counter += 1;
+    }
+    while (counter != ENTRIES_PER_CLUSTER-1);
+}
+
+uint16_t findName (uint16_t startCluster, char *filename, FILE *file)
+{
+    uint16_t counter = 0;
+    uint16_t tempNextCluster = startCluster;
+    do
+    {
+        findNameInCluster(tempNextCluster, filename, file);
+        counter +=1;
+        if(counter == ENTRIES_PER_CLUSTER-1)
+        {
+            tempNextCluster = getNextCluster(tempNextCluster, file);
+            counter == 0;
+        }
+    } while (1);
+    
 }
 
 /* // example

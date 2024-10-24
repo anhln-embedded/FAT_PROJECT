@@ -108,7 +108,7 @@ error_t showFileContent(char *filename)
 
             if (entry.name[0] != 0xE5)
             {
-                if (strstr(entry.name, filename) != NULL)
+                if (NULL != strstr(entry.name, filename))
                 {
                     tempStartCluster = entry.startCluster;
                     do
@@ -124,11 +124,6 @@ error_t showFileContent(char *filename)
                             break;
                         }
                     } while (1);
-                }
-                else
-                {
-                    printf("No such file!");
-                    break;
                 }
             }
         }

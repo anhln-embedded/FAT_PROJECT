@@ -57,6 +57,7 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
-    "fat_lib.h": "c"
+    "fat_lib.h": "c",
+    "typeinfo": "c"
   }
 }

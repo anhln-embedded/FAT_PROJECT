@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     printf("==========================\n\n");
     // changeDirectory("DOC");
     // listDirectory(0);
-    // showFileContent("SAMPLE2");
+    // showFileContent("SAMPLE3");
 
     // listDirectory(0);
 

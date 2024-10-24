@@ -21,6 +21,8 @@
 
 void readFolder(uint16_t startCluster, FILE *file);
 void readFile(uint16_t startCluster, FILE * file);
+uint16_t findName (uint16_t startCluster, char * filename);
+uint16_t findNameInCluster(uint16_t startCluster, char *filename, FILE *file);
 //void FindFolderInfor(uint16_t startCluster, char fileName, uint16_t *nextStartCluster);
 
 #endif
