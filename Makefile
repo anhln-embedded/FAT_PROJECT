@@ -6,19 +6,21 @@ CFLAGS = -Wall -Werror
 
 SRC = $(wildcard *.c)
 
-OBJ = $(SRC:.c=.o)
+OBJ = $(SRC:%.c=obj/%.o)
 
 $(TARGET): $(OBJ)
 	if not exist output mkdir output
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
 	$(TARGET) floppy.img
 
-%.o: %.c
+obj/%.o: %.c
+	if not exist obj mkdir obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	del *.o
-	rmdir /S /Q output
+	del /Q obj\*.o
+	if exist output rmdir /S /Q output
+	if exist obj rmdir /S /Q obj
 
 run: $(TARGET)
 	$(TARGET) floppy.img

@@ -7,7 +7,6 @@
 #include "read_infor.h"
 
 #define addressFAT 0x200
-typedef uint16_t START_CLUSTER;
 
 #define ATTR_DIRECTORY 0x10 // folder
 #define ATTR_FILE 0x20      // file
@@ -26,7 +25,7 @@ typedef enum ERROR_TABLE_FAT
 
 
 
-START_CLUSTER getNextCluster(START_CLUSTER startCluster, FILE *file);
+uint16_t getNextCluster(uint16_t startCluster, FILE *file);
 
 void readFolder(uint16_t startCluster, FILE *file);
 void readFile(uint16_t startCluster, FILE * file);

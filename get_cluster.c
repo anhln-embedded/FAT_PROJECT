@@ -1,6 +1,6 @@
 #include "get_cluster.h"
 
-START_CLUSTER getNextCluster(START_CLUSTER startCluster, FILE *file)
+uint16_t getNextCluster(uint16_t startCluster, FILE *file)
 {
     uint16_t nextAddress = startCluster;
     uint8_t fat[3]; // read 2 byte = 1 entry  +1/3 entry
@@ -41,68 +41,68 @@ START_CLUSTER getNextCluster(START_CLUSTER startCluster, FILE *file)
     }
 }
 
-void readFolder(uint16_t startCluster, FILE *file)
-{
-    int i = 0;
-    DirectoryEntry folder[ENTRIES_PER_CLUSTER];
-    fseek(file, (startCluster + 33 - 2) * 512, SEEK_SET);
+// void readFolder(uint16_t startCluster, FILE *file)
+// {
+//     int i = 0;
+//     DirectoryEntry folder[ENTRIES_PER_CLUSTER];
+//     fseek(file, (startCluster + 33 - 2) * 512, SEEK_SET);
 
-    uint8_t buffer[CLUSTER_SIZE];
-    fread(buffer, 1, CLUSTER_SIZE, file);
-    /// convert buffet --> struct
+//     uint8_t buffer[CLUSTER_SIZE];
+//     fread(buffer, 1, CLUSTER_SIZE, file);
+//     /// convert buffet --> struct
 
-    for (i = 0; i < ENTRIES_PER_CLUSTER; i++)
-    {
-        DirectoryEntry *entryTemp = (DirectoryEntry *)&buffer[i * DIR_ENTRY_SIZE];
-        folder[i] = *entryTemp;
-    }
+//     for (i = 0; i < ENTRIES_PER_CLUSTER; i++)
+//     {
+//         DirectoryEntry *entryTemp = (DirectoryEntry *)&buffer[i * DIR_ENTRY_SIZE];
+//         folder[i] = *entryTemp;
+//     }
 
-    // Printf
-    for (i = 0; i < ENTRIES_PER_CLUSTER; i++)
-    {
-        DirectoryEntry entry = folder[i];
+//     // Printf
+//     for (i = 0; i < ENTRIES_PER_CLUSTER; i++)
+//     {
+//         DirectoryEntry entry = folder[i];
 
-        // check name = temp
-        if (entry.name[0] == 0x00)
-        {
-            break;
-        }
+//         // check name = temp
+//         if (entry.name[0] == 0x00)
+//         {
+//             break;
+//         }
 
-        // check error
-        if (entry.name[0] == 0xE5)
-        {
-            continue;
-        }
+//         // check error
+//         if (entry.name[0] == 0xE5)
+//         {
+//             continue;
+//         }
 
-        printf("Name: %.8s", entry.name);
+//         printf("Name: %.8s", entry.name);
 
-        if (entry.attr == ATTR_DIRECTORY)
-        {
-            printf(".%.3s", entry.ext); // extern name
-        }
+//         if (entry.attr == ATTR_DIRECTORY)
+//         {
+//             printf(".%.3s", entry.ext); // extern name
+//         }
 
-        printf("\n");
+//         printf("\n");
 
-        // display attribute
-        if (entry.attr == ATTR_DIRECTORY)
-        {
-            printf("Type: Folder\n");
-        }
-        else
-        {
-            printf("Type: File\n");
-            printf("Size: %d bytes\n", entry.fileSize);
-            printf("next cluster: %x\n", entry.startCluster);
-        }
+//         // display attribute
+//         if (entry.attr == ATTR_DIRECTORY)
+//         {
+//             printf("Type: Folder\n");
+//         }
+//         else
+//         {
+//             printf("Type: File\n");
+//             printf("Size: %d bytes\n", entry.fileSize);
+//             printf("next cluster: %x\n", entry.startCluster);
+//         }
 
-        // display time date
-        printf("Date: %d/%d/%d\n", entry.date.year + 1980, entry.date.month, entry.date.day);
-        printf("Time: %d:%d:%d\n", entry.time.hour, entry.time.min, entry.time.sec);
-        printf("\n");
+//         // display time date
+//         printf("Date: %d/%d/%d\n", entry.date.year + 1980, entry.date.month, entry.date.day);
+//         printf("Time: %d:%d:%d\n", entry.time.hour, entry.time.min, entry.time.sec);
+//         printf("\n");
 
-        // printf("Start Cluster: %d\n\n", entry.startCluster);
-    }
-}
+//         // printf("Start Cluster: %d\n\n", entry.startCluster);
+//     }
+// }
 
 void readFile(uint16_t startCluster, FILE *file)
 {
@@ -114,25 +114,25 @@ void readFile(uint16_t startCluster, FILE *file)
     // printf("-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-");
 }
 
-uint16_t findNameInCluster(uint16_t startCluster, char *filename, FILE *file)
-{
-    fseek(file, (startCluster + 33 - 2) * 512, SEEK_SET);
-    DirectoryEntry *entry;
-    char arr[sizeof(DirectoryEntry)];
-    uint16_t counter = 0;
-    {
-        fread(arr, sizeof(DIR_ENTRY_SIZE), 1, file);
-        entry = (DirectoryEntry *)arr;
-        if (strstr(entry->name, filename) != NULL)
-        {
-            return entry->startCluster;
-        }
-        counter += 1;
-    }
-    while (counter != ENTRIES_PER_CLUSTER - 1)
-        ;
-    return 0;
-}
+// uint16_t findNameInCluster(uint16_t startCluster, char *filename, FILE *file)
+// {
+//     fseek(file, (startCluster + 33 - 2) * 512, SEEK_SET);
+//     DirectoryEntry *entry;
+//     char arr[sizeof(DirectoryEntry)];
+//     uint16_t counter = 0;
+//     {
+//         fread(arr, sizeof(DIR_ENTRY_SIZE), 1, file);
+//         entry = (DirectoryEntry *)arr;
+//         if (strstr(entry->name, filename) != NULL)
+//         {
+//             return entry->startCluster;
+//         }
+//         counter += 1;
+//     }
+//     while (counter != ENTRIES_PER_CLUSTER - 1)
+//         ;
+//     return 0;
+// }
 
 /* // example
 do
