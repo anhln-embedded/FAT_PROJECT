@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/MockC1/Sources/congbinh/FAT_PROJECT",
-      "program": "d:/MockC1/Sources/congbinh/FAT_PROJECT/build/Debug/outDebug",
+      "cwd": "d:/MockC1/source/FAT_PROJECT",
+      "program": "d:/MockC1/source/FAT_PROJECT/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
