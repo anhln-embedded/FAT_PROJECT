@@ -80,6 +80,7 @@ error_code_t read_boot_sector(FILE *fp, BootSector_t *bs);
 uint16_t getRootDirStart(const BootSector_t *bs);
 error_code_t getEntryInRoot(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut);
 error_code_t findNameInRoot(FILE *fp, const BootSector_t *bs, char *filename, DirectoryEntry_t *entryOput);
+int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
 
 #ifdef __cplusplus
 }

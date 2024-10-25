@@ -11,16 +11,12 @@ int main(int argc, char *argv[])
 
     FILE *fp = fopen(argv[1], "rb");
     initFat(fp);
-    listDirectory(0);
-    showFileContent("SAMPLE.TXT");
+    //listDirectory(0);
     changeDirectory("DOC");
+    changeDirectory("NEW");
+    //changeDirectory("PIC");
+    listDirectory(0);
 
-    // // changeDirectory("NEW");
-
-    // // listDirectory(0);
-
-    // printf("NO ERROR\n");
-    // cmdLineInterface();
-    printf("NO ERROR\n");
+    printf("\nNO ERROR\n");
     return 0;
 }

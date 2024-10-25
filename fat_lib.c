@@ -12,6 +12,7 @@ error_code_t initFat(FILE *file)
     read_boot_sector(gFile, &gBootSector);
     return ERROR_OK;
 }
+
 error_code_t listDirectory(uint8_t showHidden)
 {
     error_code_t status = ERROR_OK;
@@ -48,7 +49,48 @@ error_code_t listDirectory(uint8_t showHidden)
     }
     else
     {
+        uint16_t tempCluster = pHEAD->clusterEntry;
+        fseek(gFile, getAddressCluster(&gBootSector, tempCluster), SEEK_SET);
+        int i;
+        for (i = 0; i < 16; i++)
+        {
+            getEntry(gFile, &gBootSector, &entry);
+            if (entry.name[0] == 0x00)
+            {
+                continue;
+            }
 
+            if (entry.name[0] != 0xE5)
+            {
+                if (showHidden || !(entry.attr & ATTR_HIDDEN))
+                {
+                    // Ánh cho file hiện thị ở đây
+                }
+                printf("File Name: %.8s.%.3s\n", entry.name, entry.ext);
+                printf("Size: %u bytes\n", entry.fileSize);
+                printf("Starting Cluster: %u\n", entry.startCluster);
+                printf("Attributes: 0x%X\n", entry.attr);
+                printf("Date: %d/%d/%d\n", entry.date.year + 1980, entry.date.month, entry.date.day);
+                printf("Time: %d:%d:%d\n", entry.time.hour, entry.time.min, entry.time.sec);
+                printf("------------------------------\n");
+            }
+
+            if (i == 15)
+            {
+                tempCluster = getNextCluster(tempCluster, gFile);
+                if (tempCluster == FREE_CLUSTER ||
+                    tempCluster == RESERVED_CLUSTER ||
+                    tempCluster == BAD_CLUSTER ||
+                    ((tempCluster >= 0xFF8) && (tempCluster <= 0xFFF)))
+                {
+                    break;
+                }
+                else
+                {
+                    i = 0; // loop again
+                }
+            }
+        }
     }
     return status;
 }
@@ -69,14 +111,19 @@ error_code_t changeDirectory(char *dir)
         status = findNameInRoot(gFile, &gBootSector, dir, &entry);
         if (status == ERROR_OK)
         {
-            printf("\nDirectory found\n");
             addEntry(&pHEAD, entry.startCluster);
+            printf("\nDirectory found \n");
         }
     }
     else
     {
-        // Đọc từng cluster
-
+        status = findName(gFile, &gBootSector, dir, pHEAD->clusterEntry, &entry);
+        if (status == ERROR_OK)
+        {
+            printf("\nDirectory found\n");
+            addEntry(&pHEAD, entry.startCluster);
+            printf("\nDirectory found\n");
+        }
     }
     return ERROR_OK;
 }
@@ -89,7 +136,7 @@ error_code_t showFileContent(char *filename)
         status = findNameInRoot(gFile, &gBootSector, filename, &entry);
         if (status == ERROR_OK)
         {
-            readFile(gFile, entry.startCluster);
+            readFile(gFile, &gBootSector, entry.startCluster, &entry);
         }
         else
         {
@@ -98,8 +145,15 @@ error_code_t showFileContent(char *filename)
     }
     else
     {
-        //
-
+        status = findName(gFile, &gBootSector, filename, pHEAD->clusterEntry, &entry);
+        if (status == ERROR_OK)
+        {
+            readFile(gFile, &gBootSector, entry.startCluster, &entry);
+        }
+        else
+        {
+            printf("File not found\n");
+        }
     }
     return ERROR_OK;
 }
