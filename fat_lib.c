@@ -48,7 +48,7 @@ error_code_t listDirectory(uint8_t showHidden)
     }
     else
     {
-        // Không phải là thư mục gốc
+
     }
     return status;
 }
@@ -89,7 +89,7 @@ error_code_t showFileContent(char *filename)
         status = findNameInRoot(gFile, &gBootSector, filename, &entry);
         if (status == ERROR_OK)
         {
-            readFile(entry.startCluster, gFile);
+            readFile(gFile, entry.startCluster);
         }
         else
         {
@@ -98,7 +98,7 @@ error_code_t showFileContent(char *filename)
     }
     else
     {
-        // Đọc từng cluster
+        //
 
     }
     return ERROR_OK;

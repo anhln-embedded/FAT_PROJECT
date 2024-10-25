@@ -80,3 +80,4 @@ static int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename)
 
     return strcmp(entryNameCopy, filename) == 0;
 }
+
