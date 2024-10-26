@@ -41,36 +41,17 @@ uint16_t getNextCluster(uint16_t startCluster, FILE *file)
 
 uint16_t getAddressCluster(const BootSector_t *bs, uint16_t startCluster)
 {
-<<<<<<< HEAD
     uint32_t firstDataSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16) + ((bs->rootEntryCount * 32 + (bs->bytesPerSector - 1)) / bs->bytesPerSector);
-    uint32_t firstSectorOfCluster = ((startcluster - 2) * bs->sectorsPerCluster) + firstDataSector;
+    uint32_t firstSectorOfCluster = ((startCluster - 2) * bs->sectorsPerCluster) + firstDataSector;
 
     uint32_t address = firstSectorOfCluster * bs->bytesPerSector;
 
     return address;    
     return 0;
-=======
-    // Tính toán vị trí của sector đầu tiên của cluster
-    uint32_t firstDataSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16) + ((bs->rootEntryCount * 32 + (bs->bytesPerSector - 1)) / bs->bytesPerSector);
-    uint32_t firstSectorOfCluster = ((startCluster - 2) * bs->sectorsPerCluster) + firstDataSector;
-
-    // Chuyển đổi vị trí sector thành địa chỉ byte trong tệp
-    uint32_t address = firstSectorOfCluster * bs->bytesPerSector;
-
-    return address;
->>>>>>> 5c6b0084e0998db9f56d72ec3bbaa66f05e91cad
 }
 
 error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut)
 {
-<<<<<<< HEAD
-    
-=======
-    if (fread(entryOut, sizeof(DirectoryEntry_t), 1, fp) != 1) // ask later
-    {
-        return ERROR_READ_FAILURE;
-    }
->>>>>>> 5c6b0084e0998db9f56d72ec3bbaa66f05e91cad
     return ERROR_OK;
 }
 
