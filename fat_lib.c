@@ -1,4 +1,5 @@
 #include "fat_lib.h"
+#include "gui.h"
 
 static FILE *gFile = NULL;
 static dirNode_t *pHEAD = NULL;
@@ -13,7 +14,7 @@ error_code_t initFat(FILE *file)
     return ERROR_OK;
 }
 
-error_code_t listDirectory(uint8_t showHidden)
+error_code_t listDirectory(uint8_t showHidden,  contentCallback contentCallback)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
@@ -35,15 +36,8 @@ error_code_t listDirectory(uint8_t showHidden)
             {
                 if (showHidden || !(entry.attr & ATTR_HIDDEN))
                 {
-                    // Ánh cho file hiện thị ở đây
+                    contentCallback(&entry);
                 }
-                printf("File Name: %.8s.%.3s\n", entry.name, entry.ext);
-                printf("Size: %u bytes\n", entry.fileSize);
-                printf("Starting Cluster: %u\n", entry.startCluster);
-                printf("Attributes: 0x%X\n", entry.attr);
-                printf("Date: %d/%d/%d\n", entry.date.year + 1980, entry.date.month, entry.date.day);
-                printf("Time: %d:%d:%d\n", entry.time.hour, entry.time.min, entry.time.sec);
-                printf("------------------------------\n");
             }
         }
     }
@@ -64,15 +58,8 @@ error_code_t listDirectory(uint8_t showHidden)
             {
                 if (showHidden || !(entry.attr & ATTR_HIDDEN))
                 {
-                    // Ánh cho file hiện thị ở đây
+                    contentCallback(&entry);
                 }
-                printf("File Name: %.8s.%.3s\n", entry.name, entry.ext);
-                printf("Size: %u bytes\n", entry.fileSize);
-                printf("Starting Cluster: %u\n", entry.startCluster);
-                printf("Attributes: 0x%X\n", entry.attr);
-                printf("Date: %d/%d/%d\n", entry.date.year + 1980, entry.date.month, entry.date.day);
-                printf("Time: %d:%d:%d\n", entry.time.hour, entry.time.min, entry.time.sec);
-                printf("------------------------------\n");
             }
 
             if (i == 15)

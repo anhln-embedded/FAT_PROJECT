@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "cli.h"
 #include "fat_lib.h"
+#include "gui.h"
 
 char input[MAX_INPUT];
 char command[MAX_INPUT];
@@ -69,7 +70,7 @@ void test_cd(char *current_path, char *new_path) {
 }
 
 void test_ls(int show_all) {
-    listDirectory(show_all);
+    listDirectory(show_all, printDirectoryEntry);
 }
 
 void test_help() {
@@ -92,7 +93,7 @@ void cmdLineInterface() {
     printf("Command Line Interpreter:\n");
 
     while (1) {
-        printf("%s> ", current_path);
+        printf("%s$ ", current_path);
 
         fgets(input, MAX_INPUT, stdin);
         input[strcspn(input, "\n")] = '\0';
