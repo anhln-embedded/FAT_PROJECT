@@ -47,6 +47,7 @@ uint32_t getAddressCluster(const BootSector_t *bs, uint32_t startCluster)
 
     // Chuyển đổi vị trí sector thành địa chỉ byte trong tệp
     uint32_t address = firstSectorOfCluster * bs->bytesPerSector;
+    return address;
 }
 
 error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut)
@@ -96,6 +97,7 @@ error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint16_t
         printf("Find next cluster: %x\n", startCluster);
         findName(fp, bs, filename, startCluster, entryOut);
     }
+    return ERROR_OK;
 }
 
 error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry)
@@ -113,7 +115,6 @@ error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, D
     }
     else
     {
-        uint16_t counter;
         // for (counter = 0; counter < (entry->fileSize / sizeOfCluster); counter += 1)
         while (1)
         {
