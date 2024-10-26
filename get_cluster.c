@@ -1,8 +1,8 @@
 #include "get_cluster.h"
 
-uint16_t getNextCluster(uint16_t startCluster, FILE *file)
+uint32_t getNextCluster(uint32_t startCluster, FILE *file)
 {
-    uint16_t nextAddress = startCluster;
+    uint32_t nextAddress = startCluster;
     uint8_t fat[3]; // read 2 byte = 1 entry  +1/3 entry
     if (nextAddress % 2 == 0)
     {
@@ -39,7 +39,7 @@ uint16_t getNextCluster(uint16_t startCluster, FILE *file)
     }
 }
 
-uint16_t getAddressCluster(const BootSector_t *bs, uint16_t startCluster)
+uint32_t getAddressCluster(const BootSector_t *bs, uint32_t startCluster)
 {
     // Tính toán vị trí của sector đầu tiên của cluster
     uint32_t firstDataSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16) + ((bs->rootEntryCount * 32 + (bs->bytesPerSector - 1)) / bs->bytesPerSector);
@@ -47,8 +47,6 @@ uint16_t getAddressCluster(const BootSector_t *bs, uint16_t startCluster)
 
     // Chuyển đổi vị trí sector thành địa chỉ byte trong tệp
     uint32_t address = firstSectorOfCluster * bs->bytesPerSector;
-
-    return address;
 }
 
 error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut)
@@ -95,6 +93,7 @@ error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint16_t
     }
     else
     {
+        printf("Find next cluster: %x\n", startCluster);
         findName(fp, bs, filename, startCluster, entryOut);
     }
 }

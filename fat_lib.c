@@ -109,7 +109,7 @@ error_code_t changeDirectory(char *dir)
     DirectoryEntry_t entry;
     if (strcmp(dir, ".") == 0) {
         // do nothing
-        status = ERROR_OK;
+        status = ERROR_INVALID_NAME;
     }
     else if (pHEAD->clusterEntry == 0)
     {

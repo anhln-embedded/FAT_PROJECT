@@ -52,7 +52,6 @@ void test_cd(char *current_path, char *new_path) {
             } else {
                 snprintf(current_path + strlen(current_path), MAX_PATH_LENGTH - strlen(current_path), "/%s", token);
             }
-            printf("Directory changed to: %s\n", current_path);
             change_count++;  // Count successful changes
         } else {
             printf("Error: Failed to change directory to '%s'\n", token);
@@ -62,14 +61,11 @@ void test_cd(char *current_path, char *new_path) {
                 deleteDirectory(current_path);
                 change_count--;
             }
-            printf("Directory restored to: %s\n", current_path);
             return;
         }
         // Get the next directory in the path
         token = strtok(NULL, "/");
     }
-
-    printf("Final directory: %s\n", current_path);
 }
 
 void test_ls(int show_all) {

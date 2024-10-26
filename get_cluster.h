@@ -26,8 +26,8 @@ typedef enum ERROR_TABLE_FAT
 }ERROR_FAT;
 
 
-uint16_t getNextCluster(uint16_t startCluster, FILE *file);
-uint16_t getAddressCluster(const BootSector_t *bs, uint16_t startCluster);
+uint32_t getNextCluster(uint32_t startCluster, FILE *file);
+uint32_t getAddressCluster(const BootSector_t *bs, uint32_t startCluster);
 
 error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut);
 error_code_t findName(FILE *fp, const BootSector_t *bs, char * filename,  uint16_t startCluster, DirectoryEntry_t *entryOut);
