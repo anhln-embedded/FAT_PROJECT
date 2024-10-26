@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "read_infor.h" 
+#include "read_infor.h"
 
 void printHeader(void);
 void printDirectoryEntry(const DirectoryEntry_t *entry);
