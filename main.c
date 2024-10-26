@@ -15,10 +15,10 @@ int main(int argc, char *argv[])
     changeDirectory("DOC");
     // changeDirectory("CONCEPTS.DOC");
     // changeDirectory("NEWAGAIN");
-    // showFileContent("SAMPLE.TXT");
-    showFileContent("LKCD.PDF");
+    //showFileContent("SAMPLE2.TXT");
+    showFileContent("CONCEPTS.DOC");
 
-    printf("NO ERROR\n");
+    printf("\n---NO ERROR---\n");
 
     return 0;
 }

@@ -98,37 +98,28 @@ error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint32_t
 
 error_code_t readFile(FILE *fp, const BootSector_t *bs, uint32_t startCluster, DirectoryEntry_t *entry)
 {
+    uint32_t sizeOfCluster = bs->bytesPerSector * bs->sectorsPerCluster;
+    uint32_t bytesRead = 0;
+    uint32_t remainingBytes = entry->fileSize;
+
     fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
-    uint32_t sizeOfCluster = 1 + sizeof(char) * bs->bytesPerSector * bs->sectorsPerCluster;
-    char *buffContent;
-    if (entry->fileSize <= sizeOfCluster)
+    while (remainingBytes > 0)
     {
-        buffContent = (char *)malloc(sizeOfCluster + 1);
-        fread(buffContent, 1, sizeOfCluster, fp);
-        buffContent[sizeOfCluster] = '\0';
-
-        printf("\n\n---> cluster123: %x\n", getAddressCluster(bs, startCluster));
-        printf("%s", buffContent);
-        free(buffContent);
-    }
-    else
-    {
-        uint32_t counter = 0;
-        // for (counter = 0; counter < (entry->fileSize / sizeOfCluster); counter += 1)
-        while (1)
+        for (uint32_t i = 0; i < sizeOfCluster && remainingBytes > 0; i++)
         {
-            counter ++;
-            buffContent = (char *)malloc(sizeOfCluster +1 );
-            fread(buffContent, 1, sizeOfCluster, fp);
-            buffContent[sizeOfCluster] = '\0';
-            //printf("\n---> cluster %d: %x", counter,getAddressCluster(bs, startCluster));
-            printf("%s", buffContent);
-            free(buffContent);
+            int byte = fgetc(fp);
+            if (byte == EOF) break;
+            printf("%c", (char)byte);
+            bytesRead++;
+            remainingBytes--;
+        }
 
+        if (remainingBytes > 0)
+        {
             startCluster = getNextCluster(startCluster, fp);
             if (startCluster == 0)
             {
-                printf("\n\n---- END OF FILE-----");
+                printf("\n\n---- END OF FILE-----\n");
                 break;
             }
             else
@@ -137,6 +128,6 @@ error_code_t readFile(FILE *fp, const BootSector_t *bs, uint32_t startCluster, D
             }
         }
     }
-
+    printf("\n\n ---> bytes read: %d", bytesRead);
     return ERROR_OK;
 }
