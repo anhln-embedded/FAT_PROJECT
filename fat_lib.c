@@ -33,7 +33,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
                 continue;
             }
 
-            if (entry.name[0] != 0xE5)
+            if ((entry.name[0] != 0xE5) && (entry.startCluster != 0))
             {
                 if (showHidden || !(entry.attr & ATTR_HIDDEN))
                 {

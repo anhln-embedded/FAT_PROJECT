@@ -118,7 +118,7 @@ void cmdLineInterface()
 
     while (1)
     {
-        printf("%s$ ", current_path);
+        printf("Group 1%s$ ", current_path);
 
         fgets(input, MAX_INPUT, stdin);
         input[strcspn(input, "\n")] = '\0';
