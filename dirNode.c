@@ -46,8 +46,11 @@ dirNodeStatus_t deleteEntry(dirNode_t** head) {
     else {
         if (pos->prev != NULL) {
             *head = pos->prev;
+            free(pos);
         }
-        free(pos);
+        else {
+            status = DIR_NODE_STATUS_ROOT_DIR_ONLY;
+        }
     }
     return status;
 }
