@@ -12,7 +12,7 @@ error_code_t initFat(FILE *file)
     read_boot_sector(gFile, &gBootSector);
     return ERROR_OK;
 }
-error_code_t listDirectory(uint8_t showHidden)
+error_code_t listDirectory(uint8_t showHidden, headerTableCallback header, contentCallback content)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
@@ -21,6 +21,10 @@ error_code_t listDirectory(uint8_t showHidden)
         fseek(gFile, getRootDirStart(&gBootSector), SEEK_SET);
 
         int i;
+        if (header)
+        {
+            header();
+        }
         for (i = 0; i < gBootSector.rootEntryCount; i++)
         {
             status = getEntryInRoot(gFile, &gBootSector, &entry);
@@ -34,21 +38,16 @@ error_code_t listDirectory(uint8_t showHidden)
             {
                 if (showHidden || !(entry.attr & ATTR_HIDDEN))
                 {
-                    // Ánh cho file hiện thị ở đây
+                    if (content)
+                    {
+                        content(&entry);
+                    }
                 }
-                printf("File Name: %.8s.%.3s\n", entry.name, entry.ext);
-                printf("Size: %u bytes\n", entry.fileSize);
-                printf("Starting Cluster: %u\n", entry.startCluster);
-                printf("Attributes: 0x%X\n", entry.attr);
-                printf("Date: %d/%d/%d\n", entry.date.year + 1980, entry.date.month, entry.date.day);
-                printf("Time: %d:%d:%d\n", entry.time.hour, entry.time.min, entry.time.sec);
-                printf("------------------------------\n");
             }
         }
     }
     else
     {
-
     }
     return status;
 }
@@ -76,7 +75,6 @@ error_code_t changeDirectory(char *dir)
     else
     {
         // Đọc từng cluster
-
     }
     return ERROR_OK;
 }
@@ -99,7 +97,6 @@ error_code_t showFileContent(char *filename)
     else
     {
         //
-
     }
     return ERROR_OK;
 }

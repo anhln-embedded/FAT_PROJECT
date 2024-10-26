@@ -43,12 +43,18 @@ uint16_t getNextCluster(uint16_t startCluster, FILE *file)
 
 uint16_t getAddressCluster(const BootSector_t *bs, uint16_t startcluster)
 {
-    
+    uint32_t firstDataSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16) + ((bs->rootEntryCount * 32 + (bs->bytesPerSector - 1)) / bs->bytesPerSector);
+    uint32_t firstSectorOfCluster = ((startcluster - 2) * bs->sectorsPerCluster) + firstDataSector;
+
+    uint32_t address = firstSectorOfCluster * bs->bytesPerSector;
+
+    return address;    
     return 0;
 }
 
 error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut)
 {
+    
     return ERROR_OK;
 }
 error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, DirectoryEntry_t *entryOput)
