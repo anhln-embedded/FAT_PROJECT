@@ -14,7 +14,7 @@ error_code_t initFat(FILE *file)
     return ERROR_OK;
 }
 
-error_code_t listDirectory(uint8_t showHidden,  contentCallback contentCallback)
+error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCallback, contentCallback contentCallback)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
@@ -23,6 +23,7 @@ error_code_t listDirectory(uint8_t showHidden,  contentCallback contentCallback)
         fseek(gFile, getRootDirStart(&gBootSector), SEEK_SET);
 
         int i;
+        headerTableCallback();
         for (i = 0; i < gBootSector.rootEntryCount; i++)
         {
             status = getEntryInRoot(gFile, &gBootSector, &entry);
@@ -46,7 +47,9 @@ error_code_t listDirectory(uint8_t showHidden,  contentCallback contentCallback)
         uint16_t tempCluster = pHEAD->clusterEntry;
         fseek(gFile, getAddressCluster(&gBootSector, tempCluster), SEEK_SET);
         int i;
-        for (i = 0; i < 16; i++)
+        headerTableCallback();
+        uint16_t numberOfEntry = (gBootSector.bytesPerSector * gBootSector.sectorsPerCluster) / (sizeof(DirectoryEntry_t));
+        for (i = 0; i < numberOfEntry; i++)
         {
             getEntry(gFile, &gBootSector, &entry);
             if (entry.name[0] == 0x00)
@@ -56,13 +59,13 @@ error_code_t listDirectory(uint8_t showHidden,  contentCallback contentCallback)
 
             if (entry.name[0] != 0xE5)
             {
-                if (showHidden || !(entry.attr & ATTR_HIDDEN))
+                if (showHidden || (!(entry.attr & ATTR_HIDDEN) && i > 1) )
                 {
                     contentCallback(&entry);
                 }
             }
 
-            if (i == 15)
+            if (i == numberOfEntry)
             {
                 tempCluster = getNextCluster(tempCluster, gFile);
                 if (tempCluster == FREE_CLUSTER ||

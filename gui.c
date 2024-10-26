@@ -2,11 +2,60 @@
 #include <stdio.h>
 #include <string.h>
 
+// Accessing the time and date components
+static unsigned char hours;
+static unsigned char minutes;
+static unsigned char seconds; // Assuming seconds are stored in 2-second increments
+static unsigned short year;
+static unsigned char month;
+static unsigned char day;
+
+// Calculate column widths
+static int nameWidth;
+static int attrWidth;
+static int timeWidth;
+static int dateWidth;
+static int startClusterWidth;
+static int fileSizeWidth;
+
 void printCentered(const char *str, int width)
 {
     int len = strlen(str);
     int padding = (width - len) / 2;
     printf("%*s%s%*s", padding, "", str, padding + (width - len) % 2, "");
+}
+
+void printHeader(void)
+{
+    // Print the table header
+    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+           nameWidth, "----------",
+           attrWidth, "-----------",
+           timeWidth, "----------",
+           dateWidth, "------------",
+           startClusterWidth, "---------------",
+           fileSizeWidth, "-----------");
+    printf("| ");
+    printCentered("Name", nameWidth);
+    printf(" | ");
+    printCentered("Attribute", attrWidth);
+    printf(" | ");
+    printCentered("Time", timeWidth);
+    printf(" | ");
+    printCentered("Date", dateWidth);
+    printf(" | ");
+    printCentered("Start Cluster", startClusterWidth);
+    printf(" | ");
+    printCentered("File Size", fileSizeWidth);
+    printf(" |\n");
+
+    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+           nameWidth, "----------",
+           attrWidth, "-----------",
+           timeWidth, "----------",
+           dateWidth, "------------",
+           startClusterWidth, "----------------",
+           fileSizeWidth, "-----------");
 }
 
 void printDirectoryEntry(const DirectoryEntry_t *entry)
@@ -32,51 +81,20 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
         fileName[i] = '\0';
     }
 
-    // Accessing the time and date components
-    unsigned char hours = entry->time.hour;
-    unsigned char minutes = entry->time.min;
-    unsigned char seconds = entry->time.sec * 2; // Assuming seconds are stored in 2-second increments
-    unsigned short year = entry->date.year + 1980;
-    unsigned char month = entry->date.month;
-    unsigned char day = entry->date.day;
-
+    hours = entry->time.hour;
+    minutes = entry->time.min;
+    seconds = entry->time.sec * 2; // Assuming seconds are stored in 2-second increments
+    year = entry->date.year + 1980;
+    month = entry->date.month;
+    day = entry->date.day;
 
     // Calculate column widths
-    int nameWidth = strlen(fileName) > strlen("Name") ? strlen(fileName) : strlen("Name");
-    int attrWidth = strlen("Attribute");
-    int timeWidth = strlen("10:30:30") > strlen("Time") ? strlen("10:30:30") : strlen("Time");
-    int dateWidth = strlen("15/08/2001") > strlen("Date") ? strlen("15/08/2001") : strlen("Date");
-    int startClusterWidth = strlen("2") > strlen("Start Cluster") ? strlen("2") : strlen("Start Cluster");
-    int fileSizeWidth = strlen("1024") > strlen("File Size") ? strlen("1024") : strlen("File Size");
-
-    // Print the table header
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
-           nameWidth, "----------",
-           attrWidth, "-----------",
-           timeWidth, "----------",
-           dateWidth, "------------",
-           startClusterWidth, "---------------",
-           fileSizeWidth, "-----------");
-    printf("| ");
-    printCentered("Name", nameWidth);
-    printf(" | ");
-    printCentered("Attribute", attrWidth);
-    printf(" | ");
-    printCentered("Time", timeWidth);
-    printf(" | ");
-    printCentered("Date", dateWidth);
-    printf(" | ");
-    printCentered("Start Cluster", startClusterWidth);
-    printf(" | ");
-    printCentered("File Size", fileSizeWidth);
-    printf(" |\n");
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
-           nameWidth, "----------",
-           attrWidth, "-----------",
-           timeWidth, "----------",
-           dateWidth, "------------",
-           startClusterWidth, "----------------",
-           fileSizeWidth, "-----------");
+    nameWidth = strlen(fileName) > strlen("Name") ? strlen(fileName) : strlen("Name");
+    attrWidth = strlen("Attribute");
+    timeWidth = strlen("10:30:30") > strlen("Time") ? strlen("10:30:30") : strlen("Time");
+    dateWidth = strlen("15/08/2001") > strlen("Date") ? strlen("15/08/2001") : strlen("Date");
+    startClusterWidth = strlen("2") > strlen("Start Cluster") ? strlen("2") : strlen("Start Cluster");
+    fileSizeWidth = strlen("1024") > strlen("File Size") ? strlen("1024") : strlen("File Size");
 
     // Print the values
     printf("| ");
