@@ -9,6 +9,8 @@
 #include "error_codes.h"
 #include "get_cluster.h"
 
+typedef void (*contentCallback)(const DirectoryEntry_t *entry);
+typedef void (*headerTableCallback)(void);
 
 error_code_t initFat(FILE *file);
 error_code_t listDirectory(uint8_t showHidden);
