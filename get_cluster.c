@@ -108,7 +108,8 @@ error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, D
     fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
     while (remainingBytes > 0)
     {
-        for (uint32_t i = 0; i < sizeOfCluster && remainingBytes > 0; i++)
+        uint32_t i;
+        for ( i = 0; i < sizeOfCluster && remainingBytes > 0; i++)
         {
             int byte = fgetc(fp);
             if (byte == EOF) break;
