@@ -7,6 +7,7 @@
 
 
 void printHeader(void);
-void printDirectoryEntry(const DirectoryEntry_t *entry);
+void printDirectoryEntry(const DirectoryEntry_t *entry);\
+void printHelp(void);
 
 #endif // GUI_H

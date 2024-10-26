@@ -33,7 +33,7 @@ void printHeader(void)
            typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-        //    startClusterWidth, "---------------",
+           //    startClusterWidth, "---------------",
            fileSizeWidth, "-----------");
     printf("| ");
     printCentered("Name", nameWidth);
@@ -54,7 +54,7 @@ void printHeader(void)
            typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-        //    startClusterWidth, "----------------",
+           //    startClusterWidth, "----------------",
            fileSizeWidth, "-----------");
 }
 
@@ -119,6 +119,19 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
            typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-        //    startClusterWidth, "----------------",
+           //    startClusterWidth, "----------------",
            fileSizeWidth, "-----------");
+}
+
+void printHelp(void)
+{
+    printf("+------------------+---------------------------------------------+\n");
+    printf("|     Command      |                 Description                 |\n");
+    printf("+------------------+---------------------------------------------+\n");
+    printf("| ls               | List files in the current directory         |\n");
+    printf("| ls -a            | List all files, including hidden files      |\n");
+    printf("| cd <dir>         | Change the current directory to <dir>       |\n");
+    printf("| cat <file>       | Display the contents of <file>              |\n");
+    printf("| exit             | Exit the terminal or command line interface |\n");
+    printf("+------------------+---------------------------------------------+\n");
 }

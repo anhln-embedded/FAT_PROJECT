@@ -94,7 +94,7 @@ void test_ls(int show_all)
 
 void test_help()
 {
-    help();
+    help(printHelp);
 }
 
 void test_cat(char *file_name)
