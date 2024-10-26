@@ -166,7 +166,6 @@ error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, D
                 startCluster == BAD_CLUSTER ||
                 ((startCluster >= 0xFF8) && (startCluster <= 0xFFF)))
             {
-                printf("\n\n---- END OF FILE-----");
                 break;
             }
             else

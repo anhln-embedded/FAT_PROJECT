@@ -86,12 +86,15 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
 }
 void help(void)
 {
-    printf("Commands available:\n");
-    printf("ls : List files\n");
-    printf("ls -a: List all files (include hidden files or folders)\n");
-    printf("cd : Change directory\n");
-    printf("cat : Display file contents\n");
-    printf("exit : Exit terminal\n");
+printf("+------------------+---------------------------------------------+\n");
+printf("|     Command      |                 Description                 |\n");
+printf("+------------------+---------------------------------------------+\n");
+printf("| ls               | List files in the current directory         |\n");
+printf("| ls -a            | List all files, including hidden files      |\n");
+printf("| cd <dir>         | Change the current directory to <dir>       |\n");
+printf("| cat <file>       | Display the contents of <file>              |\n");
+printf("| exit             | Exit the terminal or command line interface |\n");
+printf("+------------------+---------------------------------------------+\n");
 }
 error_code_t changeDirectory(char *dir)
 {
