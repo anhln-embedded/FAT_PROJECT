@@ -68,8 +68,8 @@ error_code_t changeDirectory(char *dir)
         status = findNameInRoot(gFile, &gBootSector, dir, &entry);
         if (status == ERROR_OK)
         {
-            printf("\nDirectory found\n");
             addEntry(&pHEAD, entry.startCluster);
+            printf("\nDirectory found \n");
         }
     }
     else
@@ -87,7 +87,7 @@ error_code_t showFileContent(char *filename)
         status = findNameInRoot(gFile, &gBootSector, filename, &entry);
         if (status == ERROR_OK)
         {
-            readFile(gFile, entry.startCluster);
+            readFile(gFile, &gBootSector, entry.startCluster, &entry);
         }
         else
         {

@@ -1,6 +1,6 @@
 #include "read_infor.h"
 
-static int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
+int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
 
 error_code_t read_boot_sector(FILE *fp, BootSector_t *bs)
 {
@@ -59,25 +59,28 @@ error_code_t findNameInRoot(FILE *fp, const BootSector_t *bs, char *filename, Di
     return ERROR_INVALID_NAME;
 }
 
-static int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename) {
-    char entryNameCopy[13] = {0}; 
+int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename)
+{
+    char entryNameCopy[13] = {0};
     strncpy(entryNameCopy, entryOput->name, 8);
     entryNameCopy[8] = '\0';
 
     int i;
-    for (i = strlen(entryNameCopy) - 1; i >= 0 && entryNameCopy[i] == ' '; i--) {
+    for (i = strlen(entryNameCopy) - 1; i >= 0 && entryNameCopy[i] == ' '; i--)
+    {
         entryNameCopy[i] = '\0';
     }
 
-    if ((entryOput->attr & ATTR_DIRECTORY) == 0 && entryOput->ext[0] != ' ') {
+    if ((entryOput->attr & ATTR_DIRECTORY) == 0 && entryOput->ext[0] != ' ')
+    {
         strncat(entryNameCopy, ".", 1);
         strncat(entryNameCopy, entryOput->ext, 3);
     }
 
-    for (i = strlen(entryNameCopy) - 1; i >= 0 && entryNameCopy[i] == ' '; i--) {
+    for (i = strlen(entryNameCopy) - 1; i >= 0 && entryNameCopy[i] == ' '; i--)
+    {
         entryNameCopy[i] = '\0';
     }
 
     return strcmp(entryNameCopy, filename) == 0;
 }
-
