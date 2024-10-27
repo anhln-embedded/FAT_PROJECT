@@ -200,3 +200,26 @@ error_code_t showFileContent(char *filename)
     }
     return status;
 }
+
+error_code_t createFolder(char *dir){
+    DirectoryEntry_t entry;
+    entry.attr = ATTR_DIRECTORY;
+    entry.fileSize = 0;
+    uint32_t cluster = 0;
+    cluster = findFreeCluster(&s_gBootSector);
+    if(cluster == 0){
+        return ERROR_INVALID_CLUSTER;
+    }
+    entry.startCluster = cluster;
+    strncpy(entry.name, dir, 8);
+    strncpy(entry.ext, "   ", 3);
+
+    if(s_pHEAD->prev == NULL){
+        
+    }
+    else
+    {
+
+    }
+    return ERROR_OK;
+}

@@ -130,3 +130,8 @@ error_code_t readFile(const BootSector_t *bs, DirectoryEntry_t *entry)
 
     return 0;
 }
+
+
+uint32_t findFreeCluster(const BootSector_t *bs){
+    return 0;
+}

@@ -86,11 +86,14 @@ error_code_t goPrevDirectory(void);
  */
 error_code_t copyDirectory(dirNode_t **dest);
 
+error_code_t createFolder(char *dir);
+
 /**
  * @brief Restore the directory from the source.
  * 
  * @param source Pointer to the source directory node.
  */
 void restoreDirectory(dirNode_t **source);
+
 
 #endif /* _FAT_LIB_H_ */
