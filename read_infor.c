@@ -55,7 +55,6 @@ error_code_t findNameInRoot(FILE *fp,
             {
                 if (compareFileName(entryOput, filename))
                 {
-                    printf("Found: %x\n", entryOput->attr);
                     if (entryOput->attr == ATTR_DIRECTORY) {
                         return attribute ? ERROR_OK : ERROR_WRONG_ATTRIBUTE;
                     }

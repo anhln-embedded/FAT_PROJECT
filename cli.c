@@ -77,12 +77,16 @@ void test_cd(char *current_path, char *new_path)
         }
         else
         {
-            
             if (status == ERROR_WRONG_ATTRIBUTE) {
                 printf("Error: Try to access a file as subdirectory. Use 'cat %s' instead.\n", token);
             }
             else if (status == ERROR_NO_MORE_PREV_DIR) {
-                printf("Error: Already at root directory\n");
+                if (!change_count) {
+                    printf("Error: Cannot access previous directory at root directory\n");
+                }
+                else {
+                    printf("Error: Cannot access directory\n");
+                }
             }
             else if (status != ERROR_NO_DIRECTORY_CHANGE) {
                 printf("Error: No directory name '%s' found\n", token);
