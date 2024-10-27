@@ -94,7 +94,7 @@ void test_ls(int show_all)
 
 void test_help()
 {
-    help();
+    help(printHelp);
 }
 
 void test_cat(char *file_name)
@@ -118,7 +118,7 @@ void cmdLineInterface()
 
     while (1)
     {
-        printf("%s$ ", current_path);
+        printf("Group 1%s$ ", current_path);
 
         fgets(input, MAX_INPUT, stdin);
         input[strcspn(input, "\n")] = '\0';

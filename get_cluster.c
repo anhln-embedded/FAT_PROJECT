@@ -1,8 +1,8 @@
 #include "get_cluster.h"
 
-uint32_t getNextCluster(uint32_t startCluster, FILE *file)
+uint16_t getNextCluster(uint16_t startCluster, FILE *file)
 {
-    uint32_t nextAddress = startCluster;
+    uint16_t nextAddress = startCluster;
     uint8_t fat[3]; // read 2 byte = 1 entry  +1/3 entry
     if (nextAddress % 2 == 0)
     {
@@ -94,12 +94,48 @@ error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint16_t
     }
     else
     {
-        printf("Find next cluster: %x\n", startCluster);
         findName(fp, bs, filename, startCluster, entryOut);
     }
     return ERROR_OK;
 }
 
+error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry)
+{
+    uint32_t sizeOfCluster = bs->bytesPerSector * bs->sectorsPerCluster;
+    uint32_t bytesRead = 0;
+    uint32_t remainingBytes = entry->fileSize;
+
+    fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
+    while (remainingBytes > 0)
+    {
+        uint32_t i;
+        for ( i = 0; i < sizeOfCluster && remainingBytes > 0; i++)
+        {
+            int byte = fgetc(fp);
+            if (byte == EOF) break;
+            printf("%c", (char)byte);
+            bytesRead++;
+            remainingBytes--;
+        }
+
+        if (remainingBytes > 0)
+        {
+            startCluster = getNextCluster(startCluster, fp);
+            if (startCluster == 0)
+            {
+                break;
+            }
+            else
+            {
+                fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
+            }
+        }
+    }
+    printf("\n");
+    return ERROR_OK;
+}
+
+/*
 error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry)
 {
     fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
@@ -130,7 +166,6 @@ error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, D
                 startCluster == BAD_CLUSTER ||
                 ((startCluster >= 0xFF8) && (startCluster <= 0xFFF)))
             {
-                printf("\n\n---- END OF FILE-----");
                 break;
             }
             else
@@ -142,3 +177,5 @@ error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, D
 
     return ERROR_OK;
 }
+
+*/

@@ -33,7 +33,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
                 continue;
             }
 
-            if (entry.name[0] != 0xE5)
+            if ((entry.name[0] != 0xE5) && (entry.startCluster != 0))
             {
                 if (showHidden || !(entry.attr & ATTR_HIDDEN))
                 {
@@ -59,7 +59,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
 
             if (entry.name[0] != 0xE5)
             {
-                if (showHidden || (!(entry.attr & ATTR_HIDDEN) && i > 1) )
+                if (showHidden || (!(entry.attr & ATTR_HIDDEN) && i > 1))
                 {
                     contentCallback(&entry);
                 }
@@ -84,29 +84,30 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
     }
     return status;
 }
-void help(void)
+void help(helpCallback helpCallback)
 {
-    printf("Commands available:\n");
-    printf("ls : List files\n");
-    printf("ls -a: List all files (include hidden files or folders)\n");
-    printf("cd : Change directory\n");
-    printf("cat : Display file contents\n");
-    printf("exit : Exit terminal\n");
+    if (helpCallback)
+    {
+        helpCallback();
+    }
 }
 error_code_t changeDirectory(char *dir)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
-    if (strcmp(dir, ".") == 0) {
+    if (strcmp(dir, ".") == 0)
+    {
         // do nothing
         status = ERROR_INVALID_NAME;
     }
     else if (pHEAD->clusterEntry == 0)
     {
-        if (strcmp(dir, "..") == 0) {
+        if (strcmp(dir, "..") == 0)
+        {
             status = ERROR_FILE_NOT_FOUND;
         }
-        else {
+        else
+        {
             status = findNameInRoot(gFile, &gBootSector, dir, &entry);
             if (status == ERROR_OK)
             {
@@ -125,7 +126,8 @@ error_code_t changeDirectory(char *dir)
     return status;
 }
 
-error_code_t goPrevDirectory() {
+error_code_t goPrevDirectory()
+{
     error_code_t status = ERROR_OK;
     status = deleteEntry(&pHEAD);
     return status;
