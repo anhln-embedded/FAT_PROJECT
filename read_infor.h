@@ -25,6 +25,7 @@ extern "C"
 #define ATTR_VOLUME_ID  0x08 /*Volume ID*/
 #define ATTR_DIRECTORY  0x10 /*Directory*/
 #define ATTR_ARCHIVE    0x20 /*Archive*/
+#define ATTR_LONG_NAME  0x0F /*long file name*/
 
 /**/
 #pragma pack(1) 
