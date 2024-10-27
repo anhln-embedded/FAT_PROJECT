@@ -19,6 +19,9 @@ extern "C"
 #include <string.h>
 #include "error_codes.h"
 
+#define FILE_ATTRIBUTE_TYPE     0U
+#define FOLDER_ATTRIBUTE_TYPE   1U
+
 #define ATTR_READ_ONLY  0x01 /*Read only*/
 #define ATTR_HIDDEN     0x02 /*Hidden*/
 #define ATTR_SYSTEM     0x04 /*System*/
@@ -79,7 +82,11 @@ extern "C"
 error_code_t read_boot_sector(FILE *fp, BootSector_t *bs);
 uint16_t getRootDirStart(const BootSector_t *bs);
 error_code_t getEntryInRoot(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut);
-error_code_t findNameInRoot(FILE *fp, const BootSector_t *bs, char *filename, DirectoryEntry_t *entryOput);
+error_code_t findNameInRoot(FILE *fp, 
+                            const BootSector_t *bs, 
+                            char *filename, 
+                            DirectoryEntry_t *entryOput,
+                            uint8_t attribute);
 int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
 
 #ifdef __cplusplus

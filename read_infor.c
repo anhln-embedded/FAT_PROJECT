@@ -31,7 +31,11 @@ error_code_t getEntryInRoot(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *
     return ERROR_OK;
 }
 
-error_code_t findNameInRoot(FILE *fp, const BootSector_t *bs, char *filename, DirectoryEntry_t *entryOput)
+error_code_t findNameInRoot(FILE *fp, 
+                            const BootSector_t *bs, 
+                            char *filename, 
+                            DirectoryEntry_t *entryOput, 
+                            uint8_t attribute)
 {
     fseek(fp, getRootDirStart(bs), SEEK_SET);
     int i;
@@ -51,7 +55,13 @@ error_code_t findNameInRoot(FILE *fp, const BootSector_t *bs, char *filename, Di
             {
                 if (compareFileName(entryOput, filename))
                 {
-                    return ERROR_OK;
+                    printf("Found: %x\n", entryOput->attr);
+                    if (entryOput->attr == ATTR_DIRECTORY) {
+                        return attribute ? ERROR_OK : ERROR_WRONG_ATTRIBUTE;
+                    }
+                    else {
+                        return attribute ? ERROR_WRONG_ATTRIBUTE : ERROR_OK;
+                    }
                 }
             }
         }

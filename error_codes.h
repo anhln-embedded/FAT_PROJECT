@@ -9,7 +9,10 @@ typedef enum {
     ERROR_MEMORY_ALLOCATION,
     ERROR_INVALID_PARAMETER,
     ERROR_INVALID_NAME,
-    ERROR_UNKNOWN
+    ERROR_UNKNOWN,
+    ERROR_WRONG_ATTRIBUTE,
+    ERROR_NO_DIRECTORY_CHANGE,
+    ERROR_NO_MORE_PREV_DIR,
 } error_code_t;
 
 const char* get_error_message(error_code_t code);
