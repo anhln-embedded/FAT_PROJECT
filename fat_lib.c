@@ -247,7 +247,10 @@ error_code_t createFolder(char *dir)
             if (temp.name[0] == 0x00 || temp.name[0] == 0xE5)
             {
                 HAL_fseek(getRootDirStart(&s_gBootSector) + i * sizeof(DirectoryEntry_t));
-                HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1);
+                if(HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1) != 1)
+                {
+                    return ERROR_WRITE_FAILURE;
+                }
                 return ERROR_OK;
             }
         }
@@ -255,6 +258,5 @@ error_code_t createFolder(char *dir)
     else
     {
     }
-
-    return ERROR_OK;
+    return ERROR_UNKNOWN;
 }
