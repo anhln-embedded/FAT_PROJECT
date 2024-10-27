@@ -1,18 +1,21 @@
 #include "get_cluster.h"
 
+/*******************************************************************************
+* Code
+******************************************************************************/
 uint16_t getNextCluster(uint16_t startCluster)
 {
     uint16_t nextAddress = startCluster;
     uint8_t fat[3]; // read 2 byte = 1 entry  +1/3 entry
     if (nextAddress % 2 == 0)
     {
-        HAL_fseek(addressFAT + (3 * startCluster) / 2);
+        HAL_fseek(ADDRESS_FAT + (3 * startCluster) / 2);
         HAL_fread(fat, sizeof(uint8_t), 3);
         nextAddress = (((fat[1] & 0x0F) << 8) | fat[0]);
     }
     else
     {
-        HAL_fseek(addressFAT + (3 * (startCluster - 1)) / 2);
+        HAL_fseek(ADDRESS_FAT + (3 * (startCluster - 1)) / 2);
         HAL_fread(fat, sizeof(uint8_t), 3);
         nextAddress = (((fat[2] << 8) | fat[1]) >> 4);
     }
@@ -52,28 +55,22 @@ uint16_t getNextCluster(uint16_t startCluster)
  */
 uint32_t getAddressCluster(const BootSector_t *bs, uint32_t startCluster)
 {
-    uint32_t firstDataSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16) + ((bs->rootEntryCount * 32 + (bs->bytesPerSector - 1)) / bs->bytesPerSector);
-    uint32_t firstSectorOfCluster = ((startCluster - 2) * bs->sectorsPerCluster) + firstDataSector;
+    uint32_t firstDataSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16) + ((bs->rootEntryCount * 32U + (bs->bytesPerSector - 1U)) / bs->bytesPerSector);
+    uint32_t firstSectorOfCluster = ((startCluster - 2U) * bs->sectorsPerCluster) + firstDataSector;
     uint32_t address = firstSectorOfCluster * bs->bytesPerSector;
     return address;
 }
 
 error_code_t getEntry(const BootSector_t *bs, DirectoryEntry_t *entryOut)
 {
-
-    if (HAL_fread(entryOut, sizeof(DirectoryEntry_t), 1) != 1)
+    if (HAL_fread(entryOut, sizeof(DirectoryEntry_t), 1U) != 1U)
     {
         return ERROR_READ_FAILURE;
     }
     return ERROR_OK;
 }
 
-error_code_t findName(
-    const BootSector_t *bs,
-    char *filename,
-    uint16_t startCluster,
-    DirectoryEntry_t *entryOut,
-    uint8_t attribute)
+error_code_t findName(const BootSector_t *bs, char *filename, uint16_t startCluster, DirectoryEntry_t *entryOut, uint8_t attribute)
 {
     HAL_fseek(getAddressCluster(bs, startCluster));
     int i;
@@ -109,41 +106,42 @@ error_code_t findName(
     if (startCluster == FREE_CLUSTER ||
         startCluster == RESERVED_CLUSTER ||
         startCluster == BAD_CLUSTER ||
-        ((startCluster >= 0xFF8) && (startCluster <= 0xFFF)))
+        ((startCluster >= 0xFF8U) && (startCluster <= 0xFFFU)))
     {
         return ERROR_INVALID_NAME;
     }
     else
     {
-        findName(bs, filename, startCluster, entryOut, attribute);
+        return findName(bs, filename, startCluster, entryOut, attribute);
     }
-    return ERROR_OK;
 }
 
 error_code_t readFile(const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry)
 {
     uint32_t sizeOfCluster = bs->bytesPerSector * bs->sectorsPerCluster;
-    uint32_t bytesRead = 0;
+    uint32_t bytesRead = 0U;
     uint32_t remainingBytes = entry->fileSize;
 
     HAL_fseek(getAddressCluster(bs, startCluster));
-    while (remainingBytes > 0)
+    while (remainingBytes > 0U)
     {
         uint32_t i;
-        for (i = 0; i < sizeOfCluster && remainingBytes > 0; i++)
+        for (i = 0U; i < sizeOfCluster && remainingBytes > 0U; i++)
         {
             int byte = HAL_fgetc();
             if (byte == EOF)
+            {
                 break;
+            }
             printf("%c", (char)byte);
             bytesRead++;
             remainingBytes--;
         }
 
-        if (remainingBytes > 0)
+        if (remainingBytes > 0U)
         {
             startCluster = getNextCluster(startCluster);
-            if (startCluster == 0)
+            if (startCluster == 0U)
             {
                 break;
             }
