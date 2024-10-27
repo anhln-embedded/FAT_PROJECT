@@ -2,22 +2,27 @@
 #include <stdio.h>
 #include <string.h>
 
-// Accessing the time and date components
+/*******************************************************************************
+* Variables
+******************************************************************************/
 static unsigned char hours;
 static unsigned char minutes;
-static unsigned char seconds; // Assuming seconds are stored in 2-second increments
+static unsigned char seconds; /* Assuming seconds are stored in 2-second increments */
 static unsigned short year;
 static unsigned char month;
 static unsigned char day;
 
-// Calculate column widths
+/* Calculate column widths */
 static int nameWidth = 35;
-static int typeWidth = 6; // New column for type (File/Folder)
+static int typeWidth = 6; /* New column for type (File/Folder) */
 static int timeWidth = 11;
 static int dateWidth = 11;
-// static int startClusterWidth = 11;
+/* static int startClusterWidth = 11; */
 static int fileSizeWidth = 11;
 
+/*******************************************************************************
+* Code
+******************************************************************************/
 void printCentered(const char *str, int width)
 {
     int len = strlen(str);
@@ -27,13 +32,13 @@ void printCentered(const char *str, int width)
 
 void printHeader(void)
 {
-    // Print the table header
+    /* Print the table header */
     printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
            typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-           //    startClusterWidth, "---------------",
+           /* startClusterWidth, "---------------", */
            fileSizeWidth, "-----------");
     printf("| ");
     printCentered("Name", nameWidth);
@@ -44,8 +49,8 @@ void printHeader(void)
     printf(" | ");
     printCentered("Date", dateWidth);
     printf(" | ");
-    // printCentered("Start Cluster", startClusterWidth);
-    // printf(" | ");
+    /* printCentered("Start Cluster", startClusterWidth); */
+    /* printf(" | "); */
     printCentered("File Size", fileSizeWidth);
     printf(" |\n");
 
@@ -54,7 +59,7 @@ void printHeader(void)
            typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-           //    startClusterWidth, "----------------",
+           /* startClusterWidth, "----------------", */
            fileSizeWidth, "-----------");
 }
 
@@ -83,12 +88,12 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
 
     hours = entry->time.hour;
     minutes = entry->time.min;
-    seconds = entry->time.sec * 2; // Assuming seconds are stored in 2-second increments
+    seconds = entry->time.sec * 2; /* Assuming seconds are stored in 2-second increments */
     year = entry->date.year + 1980;
     month = entry->date.month;
     day = entry->date.day;
 
-    // Print the values
+    /* Print the values */
     printf("| ");
     printCentered(fileName, nameWidth);
     printf(" | ");
@@ -104,22 +109,22 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
     snprintf(dateStr, sizeof(dateStr), "%02d/%02d/%04d", day, month, year);
     printCentered(dateStr, dateWidth);
     printf(" | ");
-    // char startClusterStr[14];
-    // snprintf(startClusterStr, sizeof(startClusterStr), "%u", entry->startCluster);
-    // printCentered(startClusterStr, startClusterWidth);
-    // printf(" | ");
+    /* char startClusterStr[14]; */
+    /* snprintf(startClusterStr, sizeof(startClusterStr), "%u", entry->startCluster); */
+    /* printCentered(startClusterStr, startClusterWidth); */
+    /* printf(" | "); */
     char fileSizeStr[10];
     snprintf(fileSizeStr, sizeof(fileSizeStr), "%u", entry->fileSize);
     printCentered(fileSizeStr, fileSizeWidth);
     printf(" |\n");
 
-    // Print the table footer
+    /* Print the table footer */
     printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
            typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-           //    startClusterWidth, "----------------",
+           /* startClusterWidth, "----------------", */
            fileSizeWidth, "-----------");
 }
 

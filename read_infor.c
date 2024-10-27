@@ -1,6 +1,8 @@
 #include "read_infor.h"
 
-int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
+/*******************************************************************************
+* Code
+******************************************************************************/
 
 error_code_t read_boot_sector(BootSector_t *bs)
 {

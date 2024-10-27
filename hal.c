@@ -1,12 +1,19 @@
 #include "hal.h"
 
-FILE* g_stream;
+/*******************************************************************************
+* Variables
+******************************************************************************/
+FILE *g_stream = NULL;
 
-void HAL_intit(FILE *stream){
+/*******************************************************************************
+* Code
+******************************************************************************/
+void HAL_init(FILE *stream)
+{
     g_stream = stream;
 }
 
-size_t HAL_fread(void* ptr, size_t size, size_t count)
+size_t HAL_fread(void *ptr, size_t size, size_t count)
 {
     return fread(ptr, size, count, g_stream);
 }

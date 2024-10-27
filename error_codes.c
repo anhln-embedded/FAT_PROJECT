@@ -1,7 +1,12 @@
 #include "error_codes.h"
 
-const char* get_error_message(error_code_t code) {
-    switch (code) {
+/*******************************************************************************
+* Code
+******************************************************************************/
+const char* get_error_message(error_code_t code)
+{
+    switch (code)
+    {
         case ERROR_OK:
             return "No error";
         case ERROR_FILE_NOT_FOUND:
@@ -15,7 +20,13 @@ const char* get_error_message(error_code_t code) {
         case ERROR_INVALID_PARAMETER:
             return "Invalid parameter";
         case ERROR_INVALID_NAME:
-            return "Invalid name";    
+            return "Invalid name";
+        case ERROR_WRONG_ATTRIBUTE:
+            return "Wrong attribute";
+        case ERROR_NO_DIRECTORY_CHANGE:
+            return "No directory change";
+        case ERROR_NO_MORE_PREV_DIR:
+            return "No more previous directory";
         case ERROR_UNKNOWN:
         default:
             return "Unknown error";

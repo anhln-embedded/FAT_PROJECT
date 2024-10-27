@@ -1,10 +1,18 @@
 #ifndef CLI_H
 #define CLI_H
 
-#define MAX_INPUT 256
-#define MAX_PATH_LENGTH 1024
+/*******************************************************************************
+* Definitions
+******************************************************************************/
+#define MAX_INPUT 256U
+#define MAX_PATH_LENGTH 1024U
 
-/* Run command line interface */
-void cmdLineInterface();
+/*******************************************************************************
+* API
+******************************************************************************/
+/**
+ * @brief Run command line interface.
+ */
+void cmdLineInterface(void);
 
-#endif      /* CLI_H */
+#endif /* CLI_H */

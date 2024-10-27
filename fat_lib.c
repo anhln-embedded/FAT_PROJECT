@@ -1,15 +1,21 @@
 #include "fat_lib.h"
 #include "gui.h"
 
-static dirNode_t *pHEAD = NULL;
-static BootSector_t gBootSector;
+/*******************************************************************************
+* Variables
+******************************************************************************/
+static dirNode_t *s_pHEAD = NULL;
+static BootSector_t s_gBootSector;
 
+/*******************************************************************************
+* Code
+******************************************************************************/
 error_code_t initFat(FILE *file)
 {
-    HAL_intit(file);
-    pHEAD = NULL;
-    init(&pHEAD, 0);
-    read_boot_sector(&gBootSector);
+    HAL_init(file);
+    s_pHEAD = NULL;
+    init(&s_pHEAD, 0);
+    read_boot_sector(&s_gBootSector);
     return ERROR_OK;
 }
 
@@ -17,16 +23,15 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
-    if (pHEAD->clusterEntry == 0)
+    if (s_pHEAD->clusterEntry == 0)
     {
-
-        HAL_fseek(getRootDirStart(&gBootSector));
+        HAL_fseek(getRootDirStart(&s_gBootSector));
 
         int i;
         headerTableCallback();
-        for (i = 0; i < gBootSector.rootEntryCount; i++)
+        for (i = 0; i < s_gBootSector.rootEntryCount; i++)
         {
-            status = getEntryInRoot(&gBootSector, &entry);
+            status = getEntryInRoot(&s_gBootSector, &entry);
 
             if (entry.name[0] == 0x00)
             {
@@ -49,14 +54,14 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
     }
     else
     {
-        uint16_t tempCluster = pHEAD->clusterEntry;
-        HAL_fseek(getAddressCluster(&gBootSector, tempCluster));
+        uint16_t tempCluster = s_pHEAD->clusterEntry;
+        HAL_fseek(getAddressCluster(&s_gBootSector, tempCluster));
         int i;
         headerTableCallback();
-        uint16_t numberOfEntry = (gBootSector.bytesPerSector * gBootSector.sectorsPerCluster) / (sizeof(DirectoryEntry_t));
+        uint16_t numberOfEntry = (s_gBootSector.bytesPerSector * s_gBootSector.sectorsPerCluster) / (sizeof(DirectoryEntry_t));
         for (i = 0; i < numberOfEntry; i++)
         {
-            getEntry(&gBootSector, &entry);
+            getEntry(&s_gBootSector, &entry);
             if (entry.name[0] == 0x00)
             {
                 continue;
@@ -112,7 +117,7 @@ error_code_t changeDirectory(char *dir)
         // do nothing
         status = ERROR_NO_DIRECTORY_CHANGE;
     }
-    else if (pHEAD->clusterEntry == 0)
+    else if (s_pHEAD->clusterEntry == 0)
     {
         if (strcmp(dir, "..") == 0)
         {
@@ -120,10 +125,10 @@ error_code_t changeDirectory(char *dir)
         }
         else
         {
-            status = findNameInRoot(&gBootSector, dir, &entry, FOLDER_ATTRIBUTE_TYPE);
+            status = findNameInRoot(&s_gBootSector, dir, &entry, FOLDER_ATTRIBUTE_TYPE);
             if (status == ERROR_OK)
             {
-                addEntry(&pHEAD, entry.startCluster);
+                addEntry(&s_pHEAD, entry.startCluster);
             }
         }
     }
@@ -133,45 +138,48 @@ error_code_t changeDirectory(char *dir)
         {
             status = goPrevDirectory();
         }
-        else {
-            status = findName(&gBootSector, dir, pHEAD->clusterEntry, &entry, FOLDER_ATTRIBUTE_TYPE);
+        else
+        {
+            status = findName(&s_gBootSector, dir, s_pHEAD->clusterEntry, &entry, FOLDER_ATTRIBUTE_TYPE);
             if (status == ERROR_OK)
             {
-                addEntry(&pHEAD, entry.startCluster);
+                addEntry(&s_pHEAD, entry.startCluster);
             }
         }
     }
     return status;
 }
 
-error_code_t goPrevDirectory()
+error_code_t goPrevDirectory(void)
 {
     error_code_t status = ERROR_OK;
-    status = deleteEntry(&pHEAD);
+    status = deleteEntry(&s_pHEAD);
     return status;
 }
 
-error_code_t copyDirectory(dirNode_t** dest) {
+error_code_t copyDirectory(dirNode_t **dest)
+{
     error_code_t status = ERROR_OK;
-    status = copyAllEntries(dest, &pHEAD);
+    status = copyAllEntries(dest, &s_pHEAD);
     return status;
 }
 
-void restoreDirectory(dirNode_t** source) {
-    deleteAllEntries(&pHEAD);
-    pHEAD = *source;
+void restoreDirectory(dirNode_t **source)
+{
+    deleteAllEntries(&s_pHEAD);
+    s_pHEAD = *source;
 }
 
 error_code_t showFileContent(char *filename)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
-    if (pHEAD->clusterEntry == 0)
+    if (s_pHEAD->clusterEntry == 0)
     {
-        status = findNameInRoot(&gBootSector, filename, &entry, FILE_ATTRIBUTE_TYPE);
+        status = findNameInRoot(&s_gBootSector, filename, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
-            readFile(&gBootSector, entry.startCluster, &entry);
+            readFile(&s_gBootSector, entry.startCluster, &entry);
         }
         else
         {
@@ -180,10 +188,10 @@ error_code_t showFileContent(char *filename)
     }
     else
     {
-        status = findName(&gBootSector, filename, pHEAD->clusterEntry, &entry, FILE_ATTRIBUTE_TYPE);
+        status = findName(&s_gBootSector, filename, s_pHEAD->clusterEntry, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
-            readFile(&gBootSector, entry.startCluster, &entry);
+            readFile(&s_gBootSector, entry.startCluster, &entry);
         }
         else
         {
