@@ -131,7 +131,9 @@ void test_cat(char *file_name)
 
 void test_mkdir(char *dir_name)
 {
-    printf("Creating directory: %s\n", dir_name);
+    printf("Creating: %s\n", dir_name);
+    printf("%s\n", get_error_message(createFolder(dir_name)));
+    printf("Directory created\n");
 }
 
 void test_rm(char *target)
