@@ -16,7 +16,7 @@ error_code_t read_boot_sector(FILE *fp, BootSector_t *bs)
     return ERROR_OK;
 }
 
-uint32_t getRootDirStart(const BootSector_t *bs)
+uint16_t getRootDirStart(const BootSector_t *bs)
 {
     uint32_t rootDirSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16);
     return rootDirSector * bs->bytesPerSector;

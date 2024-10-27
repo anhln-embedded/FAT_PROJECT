@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "dirNode.h"
 
-dirNodeStatus_t init(dirNode_t** head, uint32_t clusterEntry) {
+dirNodeStatus_t init(dirNode_t** head, uint16_t clusterEntry) {
     dirNodeStatus_t status = DIR_NODE_STATUS_OK;
     if (*head != NULL) {
         status = DIR_NODE_STATUS_SECOND_INIT;
@@ -20,7 +20,7 @@ dirNodeStatus_t init(dirNode_t** head, uint32_t clusterEntry) {
     return status;
 }
 
-dirNodeStatus_t addEntry(dirNode_t** head, uint32_t clusterEntry) {
+dirNodeStatus_t addEntry(dirNode_t** head, uint16_t clusterEntry) {
     dirNodeStatus_t status = DIR_NODE_STATUS_OK;
     dirNode_t* node = *head;
     if (node == NULL) {
@@ -46,8 +46,11 @@ dirNodeStatus_t deleteEntry(dirNode_t** head) {
     else {
         if (pos->prev != NULL) {
             *head = pos->prev;
+            free(pos);
         }
-        free(pos);
+        else {
+            status = DIR_NODE_STATUS_ROOT_DIR_ONLY;
+        }
     }
     return status;
 }

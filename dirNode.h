@@ -15,14 +15,14 @@ typedef uint8_t dirNodeStatus_t;
 
 struct dir_node {
     dirNode_t* prev;
-    uint32_t clusterEntry;
+    uint16_t clusterEntry;
     // dirNode_t* next;
 };
 
 /* initialize double linked list */
-dirNodeStatus_t init(dirNode_t** head, uint32_t clusterEntry);
+dirNodeStatus_t init(dirNode_t** head, uint16_t clusterEntry);
 /* add next directory entry */
-dirNodeStatus_t addEntry(dirNode_t** head, uint32_t clusterEntry);
+dirNodeStatus_t addEntry(dirNode_t** head, uint16_t clusterEntry);
 /* delete entry when go back to previous directory */
 dirNodeStatus_t deleteEntry(dirNode_t** head);
 /* get 2nd last cluster entry */

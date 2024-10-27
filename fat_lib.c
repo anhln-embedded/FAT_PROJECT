@@ -1,4 +1,5 @@
 #include "fat_lib.h"
+#include "gui.h"
 
 static FILE *gFile = NULL;
 static dirNode_t *pHEAD = NULL;
@@ -12,7 +13,8 @@ error_code_t initFat(FILE *file)
     read_boot_sector(gFile, &gBootSector);
     return ERROR_OK;
 }
-error_code_t listDirectory(uint8_t showHidden, headerTableCallback header, contentCallback content)
+
+error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCallback, contentCallback contentCallback)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
@@ -21,10 +23,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback header, conte
         fseek(gFile, getRootDirStart(&gBootSector), SEEK_SET);
 
         int i;
-        if (header)
-        {
-            header();
-        }
+        headerTableCallback();
         for (i = 0; i < gBootSector.rootEntryCount; i++)
         {
             status = getEntryInRoot(gFile, &gBootSector, &entry);
@@ -34,21 +33,54 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback header, conte
                 continue;
             }
 
-            if (entry.name[0] != 0xE5)
+            if ((entry.name[0] != 0xE5) && (entry.startCluster != 0))
             {
                 if (showHidden || !(entry.attr & ATTR_HIDDEN))
                 {
-                    if (content)
-                    {
-                        content(&entry);
-                    }
+                    contentCallback(&entry);
                 }
             }
         }
     }
     else
     {
-        ///
+        uint16_t tempCluster = pHEAD->clusterEntry;
+        fseek(gFile, getAddressCluster(&gBootSector, tempCluster), SEEK_SET);
+        int i;
+        headerTableCallback();
+        uint16_t numberOfEntry = (gBootSector.bytesPerSector * gBootSector.sectorsPerCluster) / (sizeof(DirectoryEntry_t));
+        for (i = 0; i < numberOfEntry; i++)
+        {
+            getEntry(gFile, &gBootSector, &entry);
+            if (entry.name[0] == 0x00)
+            {
+                continue;
+            }
+
+            if (entry.name[0] != 0xE5)
+            {
+                if (showHidden || (!(entry.attr & ATTR_HIDDEN) && i > 1) )
+                {
+                    contentCallback(&entry);
+                }
+            }
+
+            if (i == numberOfEntry)
+            {
+                tempCluster = getNextCluster(tempCluster, gFile);
+                if (tempCluster == FREE_CLUSTER ||
+                    tempCluster == RESERVED_CLUSTER ||
+                    tempCluster == BAD_CLUSTER ||
+                    ((tempCluster >= 0xFF8) && (tempCluster <= 0xFFF)))
+                {
+                    break;
+                }
+                else
+                {
+                    i = 0; // loop again
+                }
+            }
+        }
     }
     return status;
 }
@@ -56,6 +88,7 @@ void help(void)
 {
     printf("Commands available:\n");
     printf("ls : List files\n");
+    printf("ls -a: List all files (include hidden files or folders)\n");
     printf("cd : Change directory\n");
     printf("cat : Display file contents\n");
     printf("exit : Exit terminal\n");
@@ -64,28 +97,38 @@ error_code_t changeDirectory(char *dir)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
-    if (pHEAD->clusterEntry == 0)
+    if (strcmp(dir, ".") == 0) {
+        // do nothing
+        status = ERROR_INVALID_NAME;
+    }
+    else if (pHEAD->clusterEntry == 0)
     {
-        status = findNameInRoot(gFile, &gBootSector, dir, &entry);
-        if (status == ERROR_OK)
-        {
-            addEntry(&pHEAD, entry.startCluster);
-            printf("\nDirectory found---> cluste: %d\n", pHEAD->clusterEntry);
+        if (strcmp(dir, "..") == 0) {
+            status = ERROR_FILE_NOT_FOUND;
+        }
+        else {
+            status = findNameInRoot(gFile, &gBootSector, dir, &entry);
+            if (status == ERROR_OK)
+            {
+                addEntry(&pHEAD, entry.startCluster);
+            }
         }
     }
     else
     {
-        // Đọc từng cluster
         status = findName(gFile, &gBootSector, dir, pHEAD->clusterEntry, &entry);
         if (status == ERROR_OK)
         {
             addEntry(&pHEAD, entry.startCluster);
-            printf("\nDirectory found---> cluste: %d\n", pHEAD->clusterEntry);
-        }else
-        {
         }
     }
-    return ERROR_OK;
+    return status;
+}
+
+error_code_t goPrevDirectory() {
+    error_code_t status = ERROR_OK;
+    status = deleteEntry(&pHEAD);
+    return status;
 }
 
 error_code_t showFileContent(char *filename)
@@ -101,7 +144,7 @@ error_code_t showFileContent(char *filename)
         }
         else
         {
-            printf("File not found\n");
+            status = ERROR_FILE_NOT_FOUND;
         }
     }
     else
@@ -113,8 +156,8 @@ error_code_t showFileContent(char *filename)
         }
         else
         {
-            printf("File not found\n");
+            status = ERROR_FILE_NOT_FOUND;
         }
     }
-    return ERROR_OK;
+    return status;
 }
