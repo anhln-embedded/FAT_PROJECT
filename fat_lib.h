@@ -19,5 +19,7 @@ void help(helpCallback helpCallback);
 error_code_t changeDirectory(char *dir);
 error_code_t showFileContent(char *filename);
 error_code_t goPrevDirectory(void);
+error_code_t copyDirectory(dirNode_t** dest);
+void restoreDirectory(dirNode_t** source);
 
 #endif

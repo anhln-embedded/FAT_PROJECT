@@ -44,16 +44,21 @@ void trim_trailing_whitespace(char *str)
 
 void test_cd(char *current_path, char *new_path)
 {
+    // make a copy of directory list
+    dirNode_t* temp = NULL;
+    copyDirectory(&temp);
+
+
     char temp_path[MAX_PATH_LENGTH];
     strcpy(temp_path, current_path); // Store the original path
 
     char *token = strtok(new_path, "/");
     int change_count = 0;
 
-    // printf("%s\n", token);
     while (token != NULL)
     {
-        if (changeDirectory(token) == 0)
+        error_code_t status = changeDirectory(token); 
+        if (status == ERROR_OK)
         {
             // Update the path
             if (strcmp(token, "..") == 0)
@@ -68,17 +73,28 @@ void test_cd(char *current_path, char *new_path)
             {
                 snprintf(current_path + strlen(current_path), MAX_PATH_LENGTH - strlen(current_path), "/%s", token);
             }
-            change_count++; // Count successful changes
+            change_count = 1; // indicate directory changed
         }
         else
         {
-            printf("Error: Failed to change directory to '%s'\n", token);
+            if (status == ERROR_WRONG_ATTRIBUTE) {
+                printf("Error: Try to access a file as subdirectory. Use 'cat %s' instead.\n", token);
+            }
+            else if (status == ERROR_NO_MORE_PREV_DIR) {
+                if (!change_count) {
+                    printf("Error: Cannot access previous directory at root directory\n");
+                }
+                else {
+                    printf("Error: Cannot access directory\n");
+                }
+            }
+            else if (status != ERROR_NO_DIRECTORY_CHANGE) {
+                printf("Error: No directory name '%s' found\n", token);
+            }
             // If error, restore the path by calling deleteEntry() for each successful change
-            while (change_count > 0)
-            {
-                goPrevDirectory();
-                deleteDirectory(current_path);
-                change_count--;
+            if (change_count) {
+                restoreDirectory(&temp);
+                strcpy(current_path, temp_path);
             }
             return;
         }
@@ -118,6 +134,8 @@ void cmdLineInterface()
 
     while (1)
     {
+        strcpy(input, "");
+        strcpy(command, "");
         printf("Group 1%s$ ", current_path);
 
         fgets(input, MAX_INPUT, stdin);
@@ -203,6 +221,9 @@ void cmdLineInterface()
             {
                 printf("Error: invalid argument for 'help'\n");
             }
+        }
+        else if (strcmp(command, "") == 0) {
+            // do nothing
         }
         else
         {

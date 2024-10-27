@@ -94,6 +94,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
     }
     return status;
 }
+
 void help(helpCallback helpCallback)
 {
     if (helpCallback)
@@ -101,6 +102,7 @@ void help(helpCallback helpCallback)
         helpCallback();
     }
 }
+
 error_code_t changeDirectory(char *dir)
 {
     error_code_t status = ERROR_OK;
@@ -108,17 +110,17 @@ error_code_t changeDirectory(char *dir)
     if (strcmp(dir, ".") == 0)
     {
         // do nothing
-        status = ERROR_INVALID_NAME;
+        status = ERROR_NO_DIRECTORY_CHANGE;
     }
     else if (pHEAD->clusterEntry == 0)
     {
         if (strcmp(dir, "..") == 0)
         {
-            status = ERROR_FILE_NOT_FOUND;
+            status = ERROR_NO_MORE_PREV_DIR;
         }
         else
         {
-            status = findNameInRoot(gFile, &gBootSector, dir, &entry);
+            status = findNameInRoot(gFile, &gBootSector, dir, &entry, FOLDER_ATTRIBUTE_TYPE);
             if (status == ERROR_OK)
             {
                 addEntry(&pHEAD, entry.startCluster);
@@ -127,10 +129,16 @@ error_code_t changeDirectory(char *dir)
     }
     else
     {
-        status = findName(gFile, &gBootSector, dir, pHEAD->clusterEntry, &entry);
-        if (status == ERROR_OK)
+        if (strcmp(dir, "..") == 0)
         {
-            addEntry(&pHEAD, entry.startCluster);
+            status = goPrevDirectory();
+        }
+        else {
+            status = findName(gFile, &gBootSector, dir, pHEAD->clusterEntry, &entry, FOLDER_ATTRIBUTE_TYPE);
+            if (status == ERROR_OK)
+            {
+                addEntry(&pHEAD, entry.startCluster);
+            }
         }
     }
     return status;
@@ -143,13 +151,24 @@ error_code_t goPrevDirectory()
     return status;
 }
 
+error_code_t copyDirectory(dirNode_t** dest) {
+    error_code_t status = ERROR_OK;
+    status = copyAllEntries(dest, &pHEAD);
+    return status;
+}
+
+void restoreDirectory(dirNode_t** source) {
+    deleteAllEntries(&pHEAD);
+    pHEAD = *source;
+}
+
 error_code_t showFileContent(char *filename)
 {
     error_code_t status = ERROR_OK;
     DirectoryEntry_t entry;
     if (pHEAD->clusterEntry == 0)
     {
-        status = findNameInRoot(gFile, &gBootSector, filename, &entry);
+        status = findNameInRoot(gFile, &gBootSector, filename, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
             readFile(gFile, &gBootSector, entry.startCluster, &entry);
@@ -161,7 +180,7 @@ error_code_t showFileContent(char *filename)
     }
     else
     {
-        status = findName(gFile, &gBootSector, filename, pHEAD->clusterEntry, &entry);
+        status = findName(gFile, &gBootSector, filename, pHEAD->clusterEntry, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
             readFile(gFile, &gBootSector, entry.startCluster, &entry);

@@ -59,7 +59,12 @@ error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryO
     return ERROR_OK;
 }
 
-error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint16_t startCluster, DirectoryEntry_t *entryOut)
+error_code_t findName(FILE *fp, 
+                      const BootSector_t *bs, 
+                      char *filename, 
+                      uint16_t startCluster, 
+                      DirectoryEntry_t *entryOut,
+                      uint8_t attribute)
 {
     fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
     int i;
@@ -79,7 +84,12 @@ error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint16_t
             {
                 if (compareFileName(entryOut, filename))
                 {
-                    return ERROR_OK;
+                    if (entryOut->attr == ATTR_DIRECTORY) {
+                        return attribute ? ERROR_OK : ERROR_WRONG_ATTRIBUTE;
+                    }
+                    else {
+                        return attribute ? ERROR_WRONG_ATTRIBUTE : ERROR_OK;
+                    }
                 }
             }
         }
@@ -94,7 +104,7 @@ error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint16_t
     }
     else
     {
-        findName(fp, bs, filename, startCluster, entryOut);
+        findName(fp, bs, filename, startCluster, entryOut, attribute);
     }
     return ERROR_OK;
 }
