@@ -1,37 +1,71 @@
 #ifndef _GET_CLUSTER_H_
 #define _GET_CLUSTER_H_
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
 #include "read_infor.h"
-#include "error_codes.h"
 
-#define addressFAT 0x200
-
-#define ATTR_DIRECTORY 0x10 // folder
-#define ATTR_FILE 0x20      // file
-
-// #define CLUSTER_SIZE 512
-//  #define DIR_ENTRY_SIZE 32
-//  #define ENTRIES_PER_CLUSTER (CLUSTER_SIZE / DIR_ENTRY_SIZE)
-
-typedef enum ERROR_TABLE_FAT
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+typedef enum
 {
-    FREE_CLUSTER = 0x000,
-    RESERVED_CLUSTER = 0x001,
-    BAD_CLUSTER = 0x007,
-    EOF_CLUSTER = 0xfff
+    FREE_CLUSTER = 0x000U,
+    RESERVED_CLUSTER = 0x001U,
+    BAD_CLUSTER = 0x007U,
+    EOF_CLUSTER = 0xFFFU
 } ERROR_FAT;
 
-uint16_t getNextCluster(uint16_t startCluster, FILE *file);
+/*******************************************************************************
+ * API
+ ******************************************************************************/
+/**
+ * @brief Get the next cluster in the FAT table.
+ *
+ * @param bs Pointer to the boot sector structure.
+ * @param startCluster The starting cluster.
+ * @return The next cluster.
+ */
+uint32_t getNextCluster(const BootSector_t *bs, uint32_t startCluster);
+
+/**
+ * @brief Get the address of a cluster.
+ *
+ * @param bs Pointer to the boot sector structure.
+ * @param startCluster The starting cluster.
+ * @return The address of the cluster.
+ */
 uint32_t getAddressCluster(const BootSector_t *bs, uint32_t startCluster);
 
-error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut);
-error_code_t findName(FILE *fp, const BootSector_t *bs, char *filename, uint16_t startCluster, DirectoryEntry_t *entryOut);
-error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry);
+/**
+ * @brief Get an entry from the directory.
+ *
+ * @param bs Pointer to the boot sector structure.
+ * @param entryOut Pointer to the directory entry structure to be filled.
+ * @return Error code.
+ */
+error_code_t getEntry(const BootSector_t *bs, DirectoryEntry_t *entryOut);
 
-// void FindFolderInfor(uint16_t startCluster, char fileName, uint16_t *nextStartCluster);
+/**
+ * @brief Find a name in the directory.
+ *
+ * @param bs Pointer to the boot sector structure.
+ * @param filename Pointer to the filename to be found.
+ * @param startCluster The starting cluster.
+ * @param entryOut Pointer to the directory entry structure to be filled.
+ * @param attribute Attribute type to be checked.
+ * @return Error code.
+ */
+error_code_t findName(const BootSector_t *bs, char *filename, uint32_t startCluster, DirectoryEntry_t *entryOut, uint8_t attribute);
+
+/**
+ * @brief Read a file from the directory.
+ *
+ * @param bs Pointer to the boot sector structure.
+ * @param entry Pointer to the directory entry structure.
+ * @return Error code.
+ */
+error_code_t readFile(const BootSector_t *bs, DirectoryEntry_t *entry);
+
+uint32_t findFreeCluster(const BootSector_t *bs);
+uint8_t changeEntryFAT (uint16_t value, uint16_t startCluster, const BootSector_t *bs);
 
 #endif

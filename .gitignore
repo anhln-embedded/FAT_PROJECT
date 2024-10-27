@@ -53,6 +53,8 @@ dkms.conf
 
 # Ignore file img
 *.img
+*.IMA
 
 test/*
 #FAT_v1/*
+

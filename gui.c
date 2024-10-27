@@ -2,22 +2,27 @@
 #include <stdio.h>
 #include <string.h>
 
-// Accessing the time and date components
+/*******************************************************************************
+* Variables
+******************************************************************************/
 static unsigned char hours;
 static unsigned char minutes;
-static unsigned char seconds; // Assuming seconds are stored in 2-second increments
+static unsigned char seconds; /* Assuming seconds are stored in 2-second increments */
 static unsigned short year;
 static unsigned char month;
 static unsigned char day;
 
-// Calculate column widths
+/* Calculate column widths */
 static int nameWidth = 35;
-static int attrWidth = 11;
+static int typeWidth = 6; /* New column for type (File/Folder) */
 static int timeWidth = 11;
 static int dateWidth = 11;
-// static int startClusterWidth = 11;
+/* static int startClusterWidth = 11; */
 static int fileSizeWidth = 11;
 
+/*******************************************************************************
+* Code
+******************************************************************************/
 void printCentered(const char *str, int width)
 {
     int len = strlen(str);
@@ -27,34 +32,34 @@ void printCentered(const char *str, int width)
 
 void printHeader(void)
 {
-    // Print the table header
+    /* Print the table header */
     printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
-           attrWidth, "-----------",
+           typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-        //    startClusterWidth, "---------------",
+           /* startClusterWidth, "---------------", */
            fileSizeWidth, "-----------");
     printf("| ");
     printCentered("Name", nameWidth);
     printf(" | ");
-    printCentered("Attribute", attrWidth);
+    printCentered("Type", typeWidth);
     printf(" | ");
     printCentered("Time", timeWidth);
     printf(" | ");
     printCentered("Date", dateWidth);
     printf(" | ");
-    // printCentered("Start Cluster", startClusterWidth);
-    // printf(" | ");
+    /* printCentered("Start Cluster", startClusterWidth); */
+    /* printf(" | "); */
     printCentered("File Size", fileSizeWidth);
     printf(" |\n");
 
     printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
-           attrWidth, "-----------",
+           typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-        //    startClusterWidth, "----------------",
+           /* startClusterWidth, "----------------", */
            fileSizeWidth, "-----------");
 }
 
@@ -83,26 +88,18 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
 
     hours = entry->time.hour;
     minutes = entry->time.min;
-    seconds = entry->time.sec * 2; // Assuming seconds are stored in 2-second increments
+    seconds = entry->time.sec * 2; /* Assuming seconds are stored in 2-second increments */
     year = entry->date.year + 1980;
     month = entry->date.month;
     day = entry->date.day;
 
-    // // Calculate column widths
-    // nameWidth = strlen(fileName) > strlen("Name") ? strlen(fileName) : strlen("Name");
-    // attrWidth = strlen("Attribute");
-    // timeWidth = strlen("10:30:30") > strlen("Time") ? strlen("10:30:30") : strlen("Time");
-    // dateWidth = strlen("15/08/2001") > strlen("Date") ? strlen("15/08/2001") : strlen("Date");
-    // startClusterWidth = strlen("2") > strlen("Start Cluster") ? strlen("2") : strlen("Start Cluster");
-    // fileSizeWidth = strlen("1024") > strlen("File Size") ? strlen("1024") : strlen("File Size");
-
-    // Print the values
+    /* Print the values */
     printf("| ");
     printCentered(fileName, nameWidth);
     printf(" | ");
-    char attrStr[12];
-    snprintf(attrStr, sizeof(attrStr), "%u", entry->attr);
-    printCentered(attrStr, attrWidth);
+    char typeStr[7];
+    snprintf(typeStr, sizeof(typeStr), "%s", (entry->attr & ATTR_DIRECTORY) ? "Folder" : "File");
+    printCentered(typeStr, typeWidth);
     printf(" | ");
     char timeStr[9];
     snprintf(timeStr, sizeof(timeStr), "%02d:%02d:%02d", hours, minutes, seconds);
@@ -112,21 +109,34 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
     snprintf(dateStr, sizeof(dateStr), "%02d/%02d/%04d", day, month, year);
     printCentered(dateStr, dateWidth);
     printf(" | ");
-    // char startClusterStr[14];
-    // snprintf(startClusterStr, sizeof(startClusterStr), "%u", entry->startCluster);
-    // printCentered(startClusterStr, startClusterWidth);
-    // printf(" | ");
+    /* char startClusterStr[14]; */
+    /* snprintf(startClusterStr, sizeof(startClusterStr), "%u", entry->startCluster); */
+    /* printCentered(startClusterStr, startClusterWidth); */
+    /* printf(" | "); */
     char fileSizeStr[10];
     snprintf(fileSizeStr, sizeof(fileSizeStr), "%u", entry->fileSize);
     printCentered(fileSizeStr, fileSizeWidth);
     printf(" |\n");
 
-    // Print the table footer
+    /* Print the table footer */
     printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
-           attrWidth, "-----------",
+           typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-        //    startClusterWidth, "----------------",
+           /* startClusterWidth, "----------------", */
            fileSizeWidth, "-----------");
+}
+
+void printHelp(void)
+{
+    printf("+------------------+---------------------------------------------+\n");
+    printf("|     Command      |                 Description                 |\n");
+    printf("+------------------+---------------------------------------------+\n");
+    printf("| ls               | List files in the current directory         |\n");
+    printf("| ls -a            | List all files, including hidden files      |\n");
+    printf("| cd <dir>         | Change the current directory to <dir>       |\n");
+    printf("| cat <file>       | Display the contents of <file>              |\n");
+    printf("| exit             | Exit the terminal or command line interface |\n");
+    printf("+------------------+---------------------------------------------+\n");
 }

@@ -6,11 +6,17 @@
 #include "fat_lib.h"
 #include "gui.h"
 
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
 char input[MAX_INPUT];
 char command[MAX_INPUT];
 char argument[MAX_INPUT];
-char current_path[MAX_PATH_LENGTH] = "/"; // Start in the root directory
+char current_path[MAX_PATH_LENGTH] = "/"; /* Start in the root directory */
 
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
 void deleteDirectory(char *current_path)
 {
     if (strcmp(current_path, "/") == 0)
@@ -19,14 +25,14 @@ void deleteDirectory(char *current_path)
     }
     else
     {
-        // Remove the last directory from the path
+        /* Remove the last directory from the path */
         char *last_slash = strrchr(current_path, '/');
         if (last_slash != NULL)
         {
-            *last_slash = '\0'; // Truncate the path
+            *last_slash = '\0'; /* Truncate the path */
             if (strlen(current_path) == 0)
             {
-                strcpy(current_path, "/"); // If it becomes empty, set it back to root
+                strcpy(current_path, "/"); /* If it becomes empty, set it back to root */
             }
         }
     }
@@ -37,25 +43,29 @@ void trim_trailing_whitespace(char *str)
     int end = strlen(str) - 1;
     while (end >= 0 && isspace((unsigned char)str[end]))
     {
-        str[end] = '\0'; // Set trailing spaces to null character
+        str[end] = '\0'; /* Set trailing spaces to null character */
         end--;
     }
 }
 
 void test_cd(char *current_path, char *new_path)
 {
+    /* Make a copy of directory list */
+    dirNode_t *temp = NULL;
+    copyDirectory(&temp);
+
     char temp_path[MAX_PATH_LENGTH];
-    strcpy(temp_path, current_path); // Store the original path
+    strcpy(temp_path, current_path); /* Store the original path */
 
     char *token = strtok(new_path, "/");
     int change_count = 0;
 
-    // printf("%s\n", token);
     while (token != NULL)
     {
-        if (changeDirectory(token) == 0)
+        error_code_t status = changeDirectory(token);
+        if (status == ERROR_OK)
         {
-            // Update the path
+            /* Update the path */
             if (strcmp(token, "..") == 0)
             {
                 deleteDirectory(current_path);
@@ -68,21 +78,38 @@ void test_cd(char *current_path, char *new_path)
             {
                 snprintf(current_path + strlen(current_path), MAX_PATH_LENGTH - strlen(current_path), "/%s", token);
             }
-            change_count++; // Count successful changes
+            change_count = 1; /* Indicate directory changed */
         }
         else
         {
-            printf("Error: Failed to change directory to '%s'\n", token);
-            // If error, restore the path by calling deleteEntry() for each successful change
-            while (change_count > 0)
+            if (status == ERROR_WRONG_ATTRIBUTE)
             {
-                goPrevDirectory();
-                deleteDirectory(current_path);
-                change_count--;
+                printf("Error: Try to access a file as subdirectory. Use 'cat %s' instead.\n", token);
+            }
+            else if (status == ERROR_NO_MORE_PREV_DIR)
+            {
+                if (!change_count)
+                {
+                    printf("Error: Cannot access previous directory at root directory\n");
+                }
+                else
+                {
+                    printf("Error: Cannot access directory\n");
+                }
+            }
+            else if (status != ERROR_NO_DIRECTORY_CHANGE)
+            {
+                printf("Error: No directory name '%s' found\n", token);
+            }
+            /* If error, restore the path by calling deleteEntry() for each successful change */
+            if (change_count)
+            {
+                restoreDirectory(&temp);
+                strcpy(current_path, temp_path);
             }
             return;
         }
-        // Get the next directory in the path
+        /* Get the next directory in the path */
         token = strtok(NULL, "/");
     }
 }
@@ -92,9 +119,9 @@ void test_ls(int show_all)
     listDirectory(show_all, printHeader, printDirectoryEntry);
 }
 
-void test_help()
+void test_help(void)
 {
-    help();
+    help(printHelp);
 }
 
 void test_cat(char *file_name)
@@ -112,12 +139,14 @@ void test_rm(char *target)
     printf("Removing: %s\n", target);
 }
 
-void cmdLineInterface()
+void cmdLineInterface(void)
 {
     printf("Command Line Interpreter:\n");
 
     while (1)
     {
+        strcpy(input, "");
+        strcpy(command, "");
         printf("Group 1%s$ ", current_path);
 
         fgets(input, MAX_INPUT, stdin);
@@ -130,10 +159,10 @@ void cmdLineInterface()
             break;
         }
 
-        argument[0] = '\0'; // Initialize argument to empty string
+        argument[0] = '\0'; /* Initialize argument to empty string */
         sscanf(input, "%s %s", command, argument);
 
-        // Handle each command
+        /* Handle each command */
         if (strcmp(command, "cd") == 0)
         {
             if (strlen(argument) == 0)
@@ -149,11 +178,11 @@ void cmdLineInterface()
         {
             if (strcmp(argument, "-a") == 0)
             {
-                test_ls(1); // ls -a (show all)
+                test_ls(1); /* ls -a (show all) */
             }
             else if (strlen(argument) == 0)
             {
-                test_ls(0); // ls (normal)
+                test_ls(0); /* ls (normal) */
             }
             else
             {
@@ -197,12 +226,16 @@ void cmdLineInterface()
         {
             if (strlen(argument) == 0)
             {
-                test_help(); // ls (normal)
+                test_help(); /* ls (normal) */
             }
             else
             {
                 printf("Error: invalid argument for 'help'\n");
             }
+        }
+        else if (strcmp(command, "") == 0)
+        {
+            /* do nothing */
         }
         else
         {

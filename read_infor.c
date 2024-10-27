@@ -1,11 +1,14 @@
 #include "read_infor.h"
 
-int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
 
-error_code_t read_boot_sector(FILE *fp, BootSector_t *bs)
+/*******************************************************************************
+* Code
+******************************************************************************/
+
+error_code_t read_boot_sector(BootSector_t *bs)
 {
-    fseek(fp, 0, SEEK_SET);
-    if (fread(bs, sizeof(BootSector_t), 1, fp) != 1)
+    HAL_fseek(0);
+    if (HAL_fread(bs, sizeof(BootSector_t), 1) != 1)
     {
         return ERROR_READ_FAILURE;
     }
@@ -22,22 +25,26 @@ uint16_t getRootDirStart(const BootSector_t *bs)
     return rootDirSector * bs->bytesPerSector;
 }
 
-error_code_t getEntryInRoot(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut)
+error_code_t getEntryInRoot(const BootSector_t *bs, DirectoryEntry_t *entryOut)
 {
-    if (fread(entryOut, sizeof(DirectoryEntry_t), 1, fp) != 1)
+    if(HAL_fread(entryOut, sizeof(DirectoryEntry_t), 1) != 1)
     {
         return ERROR_READ_FAILURE;
     }
     return ERROR_OK;
 }
 
-error_code_t findNameInRoot(FILE *fp, const BootSector_t *bs, char *filename, DirectoryEntry_t *entryOput)
+error_code_t findNameInRoot(
+    const BootSector_t *bs,
+    char *filename,
+    DirectoryEntry_t *entryOput,
+    uint8_t attribute)
 {
-    fseek(fp, getRootDirStart(bs), SEEK_SET);
+    HAL_fseek(getRootDirStart(bs));
     int i;
     for (i = 0; i < bs->rootEntryCount; i++)
     {
-        if (getEntryInRoot(fp, bs, entryOput) != ERROR_OK)
+        if (getEntryInRoot(bs, entryOput) != ERROR_OK)
         {
             return ERROR_INVALID_NAME;
         }
@@ -51,7 +58,14 @@ error_code_t findNameInRoot(FILE *fp, const BootSector_t *bs, char *filename, Di
             {
                 if (compareFileName(entryOput, filename))
                 {
-                    return ERROR_OK;
+                    if (entryOput->attr == ATTR_DIRECTORY)
+                    {
+                        return attribute ? ERROR_OK : ERROR_WRONG_ATTRIBUTE;
+                    }
+                    else
+                    {
+                        return attribute ? ERROR_WRONG_ATTRIBUTE : ERROR_OK;
+                    }
                 }
             }
         }
@@ -84,3 +98,4 @@ int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename)
 
     return strcmp(entryNameCopy, filename) == 0;
 }
+
