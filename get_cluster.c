@@ -1,6 +1,6 @@
 #include "get_cluster.h"
 
-uint16_t getNextCluster(const BootSector_t *bs, uint16_t startCluster)
+uint32_t getNextCluster(const BootSector_t *bs, uint32_t startCluster)
 {
     uint16_t nextCluster;
     uint32_t fatOffset = startCluster + (startCluster / 2);
@@ -15,7 +15,6 @@ uint16_t getNextCluster(const BootSector_t *bs, uint16_t startCluster)
         return 0;
     }
 
-    // Kiểm tra nếu là FAT12 (tính toán khác cho FAT16 hoặc FAT32)
     if (startCluster % 2 == 0)
     {
         nextCluster = (fatEntry[0] | (fatEntry[1] << 8)) & 0x0FFF;
@@ -25,10 +24,9 @@ uint16_t getNextCluster(const BootSector_t *bs, uint16_t startCluster)
         nextCluster = ((fatEntry[0] >> 4) | (fatEntry[1] << 4)) & 0x0FFF;
     }
 
-    // Kiểm tra cluster tiếp theo có phải là cuối chuỗi không (theo chuẩn FAT12)
     if (nextCluster >= 0xFF8)
     {
-        return 0; // Cuối chuỗi
+        return 0; 
     }
 
     return nextCluster;

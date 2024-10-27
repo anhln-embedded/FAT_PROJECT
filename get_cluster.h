@@ -23,7 +23,7 @@ typedef enum {
  * @param startCluster The starting cluster.
  * @return The next cluster.
  */
-uint16_t getNextCluster(const BootSector_t *bs, uint16_t startCluster);
+uint32_t getNextCluster(const BootSector_t *bs, uint32_t startCluster);
 
 /**
  * @brief Get the address of a cluster.
