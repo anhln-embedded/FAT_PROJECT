@@ -213,6 +213,10 @@ error_code_t createFolder(char *dir)
     {
         return ERROR_INVALID_CLUSTER;
     }
+    if (changeEntryFAT(0xFF9, cluster, &s_gBootSector) == 0)
+    {
+        return ERROR_INVALID_CLUSTER;
+    }
     entry.startCluster = cluster;
     strncpy(entry.name, dir, 8);
     strncpy(entry.ext, "   ", 3);
