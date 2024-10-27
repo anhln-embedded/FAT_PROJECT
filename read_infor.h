@@ -123,6 +123,7 @@ error_code_t findNameInRoot(const BootSector_t *bs, char *filename, DirectoryEnt
  */
 int8_t compareFileName(DirectoryEntry_t *entryOut, const char *filename);
 
+
 #ifdef __cplusplus
 }
 #endif

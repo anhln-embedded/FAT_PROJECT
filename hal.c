@@ -27,3 +27,7 @@ char HAL_fgetc(void)
 {
     return fgetc(g_stream);
 }
+
+size_t HAL_fwrite(const void *ptr, size_t size, size_t count){
+    return fwrite(ptr, size, count, g_stream);
+}

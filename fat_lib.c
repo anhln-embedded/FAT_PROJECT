@@ -1,15 +1,16 @@
+#include <time.h>
 #include "fat_lib.h"
 #include "gui.h"
 
 /*******************************************************************************
-* Variables
-******************************************************************************/
+ * Variables
+ ******************************************************************************/
 static dirNode_t *s_pHEAD = NULL;
 static BootSector_t s_gBootSector;
 
 /*******************************************************************************
-* Code
-******************************************************************************/
+ * Code
+ ******************************************************************************/
 error_code_t initFat(FILE *file)
 {
     HAL_init(file);
@@ -191,7 +192,7 @@ error_code_t showFileContent(char *filename)
         status = findName(&s_gBootSector, filename, s_pHEAD->clusterEntry, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
-            readFile(&s_gBootSector,&entry);
+            readFile(&s_gBootSector, &entry);
         }
         else
         {
@@ -201,25 +202,52 @@ error_code_t showFileContent(char *filename)
     return status;
 }
 
-error_code_t createFolder(char *dir){
+error_code_t createFolder(char *dir)
+{
     DirectoryEntry_t entry;
     entry.attr = ATTR_DIRECTORY;
     entry.fileSize = 0;
     uint32_t cluster = 0;
     cluster = findFreeCluster(&s_gBootSector);
-    if(cluster == 0){
+    if (cluster == 0)
+    {
         return ERROR_INVALID_CLUSTER;
     }
     entry.startCluster = cluster;
     strncpy(entry.name, dir, 8);
     strncpy(entry.ext, "   ", 3);
 
-    if(s_pHEAD->prev == NULL){
-        
+    time_t rawtime;
+    struct tm *timeinfo;
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    entry.time.hour = timeinfo->tm_hour;
+    entry.time.min = timeinfo->tm_min;
+    entry.time.sec = timeinfo->tm_sec / 2;             /* Assuming seconds are stored in 2-second increments */
+    entry.date.year = timeinfo->tm_year + 1900 - 1980; /* FAT year is based at 1980 */
+    entry.date.month = timeinfo->tm_mon + 1;
+    entry.date.day = timeinfo->tm_mday;
+
+    if (s_pHEAD->prev == NULL)
+    {
+        HAL_fseek(getRootDirStart(&s_gBootSector));
+        int i;
+        for (i = 0; i < s_gBootSector.rootEntryCount; i++)
+        {
+            DirectoryEntry_t temp;
+            getEntryInRoot(&s_gBootSector, &temp);
+            if (temp.name[0] == 0x00 || temp.name[0] == 0xE5)
+            {
+                HAL_fseek(getAddressCluster(&s_gBootSector, i));
+                HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1);
+                break;
+            }
+        }
     }
     else
     {
-
     }
+
     return ERROR_OK;
 }

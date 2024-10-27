@@ -40,4 +40,18 @@ int HAL_fseek(uint32_t offset);
  */
 char HAL_fgetc(void);
 
+/**
+ * @brief Writes data to a file.
+ *
+ * This function writes `count` elements of data, each `size` bytes long, 
+ * from the buffer pointed to by `ptr` to the file.
+ *
+ * @param ptr Pointer to the buffer containing the data to be written.
+ * @param size Size, in bytes, of each element to be written.
+ * @param count Number of elements, each of size `size`, to be written.
+ * @return The total number of elements successfully written, which may be less than `count` 
+ *         if an error occurs or the end of the file is reached.
+ */
+size_t HAL_fwrite(const void *ptr, size_t size, size_t count);
+
 #endif /* _HAL_H_ */

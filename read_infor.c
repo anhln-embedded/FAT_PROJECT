@@ -1,5 +1,6 @@
 #include "read_infor.h"
 
+
 /*******************************************************************************
 * Code
 ******************************************************************************/
@@ -97,3 +98,4 @@ int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename)
 
     return strcmp(entryNameCopy, filename) == 0;
 }
+
