@@ -244,7 +244,7 @@ error_code_t createFolder(char *dir)
         {
             DirectoryEntry_t temp;
             getEntryInRoot(&s_gBootSector, &temp);
-            if (temp.name[0] == 0x00 || temp.name[0] == 0xE5)
+            if (temp.name[0] == 0x00 || temp.name[0] == (char)0xE5)
             {
                 HAL_fseek(getRootDirStart(&s_gBootSector) + i * sizeof(DirectoryEntry_t));
                 if (HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1) != 1)
