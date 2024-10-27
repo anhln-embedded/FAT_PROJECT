@@ -13,9 +13,10 @@ static unsigned char day;
 // Calculate column widths
 static int nameWidth = 35;
 static int typeWidth = 6; // New column for type (File/Folder)
+static int attrWidth = 10; // New column for attributes
 static int timeWidth = 11;
 static int dateWidth = 11;
-// static int startClusterWidth = 11;
+static int startClusterWidth = 14; // New column for start cluster
 static int fileSizeWidth = 11;
 
 void printCentered(const char *str, int width)
@@ -28,33 +29,37 @@ void printCentered(const char *str, int width)
 void printHeader(void)
 {
     // Print the table header
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
            typeWidth, "------",
+           attrWidth, "----------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-           //    startClusterWidth, "---------------",
+           startClusterWidth, "--------------",
            fileSizeWidth, "-----------");
     printf("| ");
     printCentered("Name", nameWidth);
     printf(" | ");
     printCentered("Type", typeWidth);
     printf(" | ");
+    printCentered("Attributes", attrWidth);
+    printf(" | ");
     printCentered("Time", timeWidth);
     printf(" | ");
     printCentered("Date", dateWidth);
     printf(" | ");
-    // printCentered("Start Cluster", startClusterWidth);
-    // printf(" | ");
+    printCentered("Start Cluster", startClusterWidth);
+    printf(" | ");
     printCentered("File Size", fileSizeWidth);
     printf(" |\n");
 
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
            typeWidth, "------",
+           attrWidth, "----------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-           //    startClusterWidth, "----------------",
+           startClusterWidth, "--------------",
            fileSizeWidth, "-----------");
 }
 
@@ -96,6 +101,10 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
     snprintf(typeStr, sizeof(typeStr), "%s", (entry->attr & ATTR_DIRECTORY) ? "Folder" : "File");
     printCentered(typeStr, typeWidth);
     printf(" | ");
+    char attrStr[11];
+    snprintf(attrStr, sizeof(attrStr), "%02X", entry->attr);
+    printCentered(attrStr, attrWidth);
+    printf(" | ");
     char timeStr[9];
     snprintf(timeStr, sizeof(timeStr), "%02d:%02d:%02d", hours, minutes, seconds);
     printCentered(timeStr, timeWidth);
@@ -104,22 +113,23 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
     snprintf(dateStr, sizeof(dateStr), "%02d/%02d/%04d", day, month, year);
     printCentered(dateStr, dateWidth);
     printf(" | ");
-    // char startClusterStr[14];
-    // snprintf(startClusterStr, sizeof(startClusterStr), "%u", entry->startCluster);
-    // printCentered(startClusterStr, startClusterWidth);
-    // printf(" | ");
+    char startClusterStr[15];
+    snprintf(startClusterStr, sizeof(startClusterStr), "%u", entry->startCluster);
+    printCentered(startClusterStr, startClusterWidth);
+    printf(" | ");
     char fileSizeStr[10];
     snprintf(fileSizeStr, sizeof(fileSizeStr), "%u", entry->fileSize);
     printCentered(fileSizeStr, fileSizeWidth);
     printf(" |\n");
 
     // Print the table footer
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
            nameWidth, "-----------------------------------",
            typeWidth, "------",
+           attrWidth, "----------",
            timeWidth, "-----------",
            dateWidth, "-----------",
-           //    startClusterWidth, "----------------",
+           startClusterWidth, "--------------",
            fileSizeWidth, "-----------");
 }
 
