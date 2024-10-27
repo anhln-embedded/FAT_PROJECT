@@ -28,6 +28,11 @@ const char* get_error_message(error_code_t code)
         case ERROR_NO_MORE_PREV_DIR:
             return "No more previous directory";
         case ERROR_UNKNOWN:
+            return "Unknown error";
+        case ERROR_INVALID_CLUSTER:
+            return "Invalid cluster";
+        case ERROR_DELETE_FOLDER:
+            return "Delete folder error";
         default:
             return "Unknown error";
     }

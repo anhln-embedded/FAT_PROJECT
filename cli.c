@@ -139,6 +139,7 @@ void test_mkdir(char *dir_name)
 void test_rm(char *target)
 {
     printf("Removing: %s\n", target);
+    printf("%s\n", get_error_message(deleteFolder(target)));
 }
 
 void cmdLineInterface(void)

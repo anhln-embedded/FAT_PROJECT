@@ -71,7 +71,7 @@ error_code_t findName(
             {
                 continue;
             }
-            if (entryOut->name[0] != 0xE5)
+            if (entryOut->name[0] != (char)0xE5)
             {
                 if (compareFileName(entryOut, filename))
                 {
@@ -167,7 +167,7 @@ uint32_t findFreeCluster(const BootSector_t *bs)
 }
 
 error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
-{   
+{
     uint32_t fatOffset = (cluster * 3) / 2;
     uint32_t fatSector = bs->reservedSectors + (fatOffset / bs->bytesPerSector);
     uint32_t fatEntryOffset = fatOffset % bs->bytesPerSector;
@@ -189,7 +189,7 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
     HAL_fseek(fatSector * bs->bytesPerSector + fatEntryOffset);
     HAL_fwrite(fatEntry, sizeof(uint8_t), 3);
 
-    return ERROR_OK;    
+    return ERROR_OK;
 }
 
 uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t *bs)
@@ -220,3 +220,7 @@ uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t
     return 1; /// OK
 }
 
+error_code_t freeClusterUsed(uint32_t cluster, const BootSector_t *bs)
+{
+    
+}

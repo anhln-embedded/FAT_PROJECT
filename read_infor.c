@@ -1,9 +1,8 @@
 #include "read_infor.h"
 
-
 /*******************************************************************************
-* Code
-******************************************************************************/
+ * Code
+ ******************************************************************************/
 
 error_code_t read_boot_sector(BootSector_t *bs)
 {
@@ -27,7 +26,7 @@ uint16_t getRootDirStart(const BootSector_t *bs)
 
 error_code_t getEntryInRoot(const BootSector_t *bs, DirectoryEntry_t *entryOut)
 {
-    if(HAL_fread(entryOut, sizeof(DirectoryEntry_t), 1) != 1)
+    if (HAL_fread(entryOut, sizeof(DirectoryEntry_t), 1) != 1)
     {
         return ERROR_READ_FAILURE;
     }
@@ -54,7 +53,7 @@ error_code_t findNameInRoot(
             {
                 continue;
             }
-            if (entryOput->name[0] != 0xE5)
+            if (entryOput->name[0] != (char)0xE5)
             {
                 if (compareFileName(entryOput, filename))
                 {
@@ -72,6 +71,8 @@ error_code_t findNameInRoot(
     }
     return ERROR_INVALID_NAME;
 }
+
+
 
 int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename)
 {
@@ -98,4 +99,3 @@ int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename)
 
     return strcmp(entryNameCopy, filename) == 0;
 }
-
