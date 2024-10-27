@@ -2,6 +2,7 @@
 #define _HAL_H_
 
 #include <stdio.h>
+#include <stdint.h>
 
 /*******************************************************************************
 * API
@@ -30,7 +31,7 @@ size_t HAL_fread(void *ptr, size_t size, size_t count);
  * @param offset Offset value to set the position indicator.
  * @return 0 on success, non-zero on failure.
  */
-int HAL_fseek(long offset);
+int HAL_fseek(uint32_t offset);
 
 /**
  * @brief Get a character from the HAL.

@@ -20,6 +20,7 @@ typedef enum {
     ERROR_WRONG_ATTRIBUTE,
     ERROR_NO_DIRECTORY_CHANGE,
     ERROR_NO_MORE_PREV_DIR,
+    ERROR_INVALID_CLUSTER
 } error_code_t;
 
 /*******************************************************************************

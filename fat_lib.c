@@ -82,7 +82,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
 
             if (i == numberOfEntry)
             {
-                tempCluster = getNextCluster(tempCluster);
+                tempCluster = getNextCluster(&s_gBootSector, tempCluster);
                 if (tempCluster == FREE_CLUSTER ||
                     tempCluster == RESERVED_CLUSTER ||
                     tempCluster == BAD_CLUSTER ||
@@ -179,7 +179,7 @@ error_code_t showFileContent(char *filename)
         status = findNameInRoot(&s_gBootSector, filename, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
-            readFile(&s_gBootSector, entry.startCluster, &entry);
+            readFile(&s_gBootSector, &entry);
         }
         else
         {
@@ -191,7 +191,7 @@ error_code_t showFileContent(char *filename)
         status = findName(&s_gBootSector, filename, s_pHEAD->clusterEntry, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
-            readFile(&s_gBootSector, entry.startCluster, &entry);
+            readFile(&s_gBootSector,&entry);
         }
         else
         {
