@@ -215,6 +215,7 @@ error_code_t createFolder(char *dir)
     }
     else
     {
+        printf("Cluster: %d\n", cluster);
         markClusterUsed(cluster, &s_gBootSector);
     }
 
@@ -245,7 +246,6 @@ error_code_t createFolder(char *dir)
             getEntryInRoot(&s_gBootSector, &temp);
             if (temp.name[0] == 0x00 || temp.name[0] == 0xE5)
             {
-                printf("Root directory -----------\n");
                 HAL_fseek(getRootDirStart(&s_gBootSector) + i * sizeof(DirectoryEntry_t));
                 HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1);
                 return ERROR_OK;
