@@ -222,5 +222,5 @@ uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t
 
 error_code_t freeClusterUsed(uint32_t cluster, const BootSector_t *bs)
 {
-    
+    return ERROR_OK;
 }
