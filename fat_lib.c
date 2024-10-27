@@ -213,10 +213,11 @@ error_code_t createFolder(char *dir)
     {
         return ERROR_INVALID_CLUSTER;
     }
-    if (changeEntryFAT(0xFF9, cluster, &s_gBootSector) == 0)
+    else
     {
-        return ERROR_INVALID_CLUSTER;
+        markClusterUsed(cluster, &s_gBootSector);
     }
+
     entry.startCluster = cluster;
     strncpy(entry.name, dir, 8);
     strncpy(entry.ext, "   ", 3);
@@ -235,6 +236,7 @@ error_code_t createFolder(char *dir)
 
     if (s_pHEAD->prev == NULL)
     {
+        
         HAL_fseek(getRootDirStart(&s_gBootSector));
         int i;
         for (i = 0; i < s_gBootSector.rootEntryCount; i++)
@@ -243,9 +245,10 @@ error_code_t createFolder(char *dir)
             getEntryInRoot(&s_gBootSector, &temp);
             if (temp.name[0] == 0x00 || temp.name[0] == 0xE5)
             {
-                HAL_fseek(getAddressCluster(&s_gBootSector, i));
+                printf("Root directory -----------\n");
+                HAL_fseek(getRootDirStart(&s_gBootSector) + i * sizeof(DirectoryEntry_t));
                 HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1);
-                break;
+                return ERROR_OK;
             }
         }
     }

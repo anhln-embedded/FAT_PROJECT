@@ -135,37 +135,65 @@ uint32_t findFreeCluster(const BootSector_t *bs)
 {
     uint32_t fatSectorOffset = bs->reservedSectors * bs->bytesPerSector;
     HAL_fseek(fatSectorOffset);
-    uint8_t fatEntry[2];
+    uint8_t fatEntry[3]; /* Read 3 bytes to handle 2 FAT12 entries */
     uint16_t buffer;
     uint16_t freeCluster;
-    for (freeCluster = 2; freeCluster <= bs->sectorsPerFAT16 * bs->bytesPerSector; freeCluster++)
+    uint32_t totalClusters = (bs->sectorsPerFAT16 * bs->bytesPerSector * 2) / 3;
+    for (freeCluster = 2; freeCluster < totalClusters; freeCluster++)
     {
-        if (HAL_fread(fatEntry, sizeof(uint8_t), 2) != 2)
+        uint32_t fatOffset = (freeCluster * 3) / 2;
+        uint32_t fatSector = bs->reservedSectors + (fatOffset / bs->bytesPerSector);
+        uint32_t fatEntryOffset = fatOffset % bs->bytesPerSector;
+
+        HAL_fseek(fatSector * bs->bytesPerSector + fatEntryOffset);
+        HAL_fread(fatEntry, sizeof(uint8_t), 3);
+
+        if (freeCluster % 2 == 0)
         {
-            return 0;
+            buffer = (fatEntry[1] << 8 | fatEntry[0]) & 0x0FFF;
         }
         else
         {
-            if (freeCluster % 2 == 0)
-            {
-                buffer = (fatEntry[0] | (fatEntry[1] << 8)) & 0x0FFF;
-            }
-            else
-            {
-                buffer = ((fatEntry[0] >> 4) | (fatEntry[1] << 4)) & 0x0FFF;
-            }
+            buffer = (fatEntry[2] << 4 | fatEntry[1] >> 4) & 0x0FFF;
+        }
 
-            if (buffer == 0x000)
-            {
-                return freeCluster;
-            }
+        if (buffer == 0x000)
+        {
+            return freeCluster;
         }
     }
+
     return 0;
 }
 
-uint8_t changeEntryFAT (uint16_t value, uint16_t startCluster, const BootSector_t *bs)
+error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
 {   
+    uint32_t fatOffset = (cluster * 3) / 2;
+    uint32_t fatSector = bs->reservedSectors + (fatOffset / bs->bytesPerSector);
+    uint32_t fatEntryOffset = fatOffset % bs->bytesPerSector;
+    uint8_t fatEntry[3]; /* Read 3 bytes to handle 2 FAT12 entries */
+    HAL_fseek(fatSector * bs->bytesPerSector + fatEntryOffset);
+    HAL_fread(fatEntry, sizeof(uint8_t), 3);
+
+    if (cluster % 2 == 0)
+    {
+        fatEntry[0] = 0xFF;
+        fatEntry[1] = (fatEntry[1] & 0xF0) | 0x0F;
+    }
+    else
+    {
+        fatEntry[1] = (fatEntry[1] & 0x0F) | 0xF0;
+        fatEntry[2] = 0xFF;
+    }
+
+    HAL_fseek(fatSector * bs->bytesPerSector + fatEntryOffset);
+    HAL_fwrite(fatEntry, sizeof(uint8_t), 3);
+
+    return ERROR_OK;    
+}
+
+uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t *bs)
+{
     uint32_t fatOffset = startCluster + (startCluster / 2);
     uint32_t fatSectorOffset = bs->reservedSectors * bs->bytesPerSector;
 
@@ -175,7 +203,7 @@ uint8_t changeEntryFAT (uint16_t value, uint16_t startCluster, const BootSector_
 
     if (HAL_fread(fatEntry, sizeof(uint8_t), 2) != 2)
     {
-        return 1; //not ok
+        return 1; // not ok
     }
 
     if (startCluster % 2 == 0)
@@ -186,8 +214,9 @@ uint8_t changeEntryFAT (uint16_t value, uint16_t startCluster, const BootSector_
     else
     {
         fatEntry[0] = (fatEntry[0] & 0x0F) | ((value & 0x0F) << 4);
-        fatEntry[1] = value >>4;
+        fatEntry[1] = value >> 4;
     }
 
     return 1; /// OK
 }
+
