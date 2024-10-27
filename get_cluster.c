@@ -1,19 +1,19 @@
 #include "get_cluster.h"
 
-uint16_t getNextCluster(uint16_t startCluster, FILE *file)
+uint16_t getNextCluster(uint16_t startCluster)
 {
     uint16_t nextAddress = startCluster;
     uint8_t fat[3]; // read 2 byte = 1 entry  +1/3 entry
     if (nextAddress % 2 == 0)
     {
-        fseek(file, (int)(addressFAT + (3 * startCluster) / 2), SEEK_SET); // come to address FAT
-        fread(fat, sizeof(uint8_t), 3, file);
+        HAL_fseek(addressFAT + (3 * startCluster) / 2);
+        HAL_fread(fat, sizeof(uint8_t), 3);
         nextAddress = (((fat[1] & 0x0F) << 8) | fat[0]);
     }
     else
     {
-        fseek(file, (int)(addressFAT + (3 * (startCluster - 1)) / 2), SEEK_SET); // come to address FAT
-        fread(fat, sizeof(uint8_t), 3, file);
+        HAL_fseek(addressFAT + (3 * (startCluster - 1)) / 2);
+        HAL_fread(fat, sizeof(uint8_t), 3);
         nextAddress = (((fat[2] << 8) | fat[1]) >> 4);
     }
     // check next cluster
@@ -39,38 +39,47 @@ uint16_t getNextCluster(uint16_t startCluster, FILE *file)
     }
 }
 
+/**
+ * @brief Calculates the byte address of the first sector of a given cluster.
+ *
+ * This function computes the byte address of the first sector of a specified
+ * cluster in a FAT file system. It uses the information from the boot sector
+ * to determine the location.
+ *
+ * @param bs Pointer to the BootSector_t structure containing the boot sector information.
+ * @param startCluster The cluster number for which the address is to be calculated.
+ * @return The byte address of the first sector of the specified cluster.
+ */
 uint32_t getAddressCluster(const BootSector_t *bs, uint32_t startCluster)
 {
-    // Tính toán vị trí của sector đầu tiên của cluster
     uint32_t firstDataSector = bs->reservedSectors + (bs->numberOfFATs * bs->sectorsPerFAT16) + ((bs->rootEntryCount * 32 + (bs->bytesPerSector - 1)) / bs->bytesPerSector);
     uint32_t firstSectorOfCluster = ((startCluster - 2) * bs->sectorsPerCluster) + firstDataSector;
-
-    // Chuyển đổi vị trí sector thành địa chỉ byte trong tệp
     uint32_t address = firstSectorOfCluster * bs->bytesPerSector;
     return address;
 }
 
-error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut)
+error_code_t getEntry(const BootSector_t *bs, DirectoryEntry_t *entryOut)
 {
-    if (fread(entryOut, sizeof(DirectoryEntry_t), 1, fp) != 1) // ask later
+
+    if (HAL_fread(entryOut, sizeof(DirectoryEntry_t), 1) != 1)
     {
         return ERROR_READ_FAILURE;
     }
     return ERROR_OK;
 }
 
-error_code_t findName(FILE *fp, 
-                      const BootSector_t *bs, 
-                      char *filename, 
-                      uint16_t startCluster, 
-                      DirectoryEntry_t *entryOut,
-                      uint8_t attribute)
+error_code_t findName(
+    const BootSector_t *bs,
+    char *filename,
+    uint16_t startCluster,
+    DirectoryEntry_t *entryOut,
+    uint8_t attribute)
 {
-    fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
+    HAL_fseek(getAddressCluster(bs, startCluster));
     int i;
     for (i = 0; i < bs->rootEntryCount; i++)
     {
-        if (getEntry(fp, bs, entryOut) != ERROR_OK)
+        if (getEntry(bs, entryOut) != ERROR_OK)
         {
             return ERROR_INVALID_NAME;
         }
@@ -84,17 +93,19 @@ error_code_t findName(FILE *fp,
             {
                 if (compareFileName(entryOut, filename))
                 {
-                    if (entryOut->attr == ATTR_DIRECTORY) {
+                    if (entryOut->attr == ATTR_DIRECTORY)
+                    {
                         return attribute ? ERROR_OK : ERROR_WRONG_ATTRIBUTE;
                     }
-                    else {
+                    else
+                    {
                         return attribute ? ERROR_WRONG_ATTRIBUTE : ERROR_OK;
                     }
                 }
             }
         }
     }
-    startCluster = getNextCluster(startCluster, fp);
+    startCluster = getNextCluster(startCluster);
     if (startCluster == FREE_CLUSTER ||
         startCluster == RESERVED_CLUSTER ||
         startCluster == BAD_CLUSTER ||
@@ -104,25 +115,26 @@ error_code_t findName(FILE *fp,
     }
     else
     {
-        findName(fp, bs, filename, startCluster, entryOut, attribute);
+        findName(bs, filename, startCluster, entryOut, attribute);
     }
     return ERROR_OK;
 }
 
-error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry)
+error_code_t readFile(const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry)
 {
     uint32_t sizeOfCluster = bs->bytesPerSector * bs->sectorsPerCluster;
     uint32_t bytesRead = 0;
     uint32_t remainingBytes = entry->fileSize;
 
-    fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
+    HAL_fseek(getAddressCluster(bs, startCluster));
     while (remainingBytes > 0)
     {
         uint32_t i;
-        for ( i = 0; i < sizeOfCluster && remainingBytes > 0; i++)
+        for (i = 0; i < sizeOfCluster && remainingBytes > 0; i++)
         {
-            int byte = fgetc(fp);
-            if (byte == EOF) break;
+            int byte = HAL_fgetc();
+            if (byte == EOF)
+                break;
             printf("%c", (char)byte);
             bytesRead++;
             remainingBytes--;
@@ -130,62 +142,17 @@ error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, D
 
         if (remainingBytes > 0)
         {
-            startCluster = getNextCluster(startCluster, fp);
+            startCluster = getNextCluster(startCluster);
             if (startCluster == 0)
             {
                 break;
             }
             else
             {
-                fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
+                HAL_fseek(getAddressCluster(bs, startCluster));
             }
         }
     }
     printf("\n");
     return ERROR_OK;
 }
-
-/*
-error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry)
-{
-    fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
-    uint16_t sizeOfCluster = 1 + sizeof(char) * bs->bytesPerSector * bs->sectorsPerCluster;
-    char *buffContent;
-    if (entry->fileSize <= sizeOfCluster)
-    {
-        buffContent = (char *)malloc(sizeOfCluster + 1);
-        fread(buffContent, 1, sizeOfCluster, fp);
-        buffContent[sizeOfCluster] = '\0';
-        printf("%s", buffContent);
-        free(buffContent);
-    }
-    else
-    {
-        // for (counter = 0; counter < (entry->fileSize / sizeOfCluster); counter += 1)
-        while (1)
-        {
-            buffContent = (char *)malloc(sizeOfCluster + 1);
-            fread(buffContent, 1, sizeOfCluster, fp);
-            buffContent[sizeOfCluster] = '\0';
-            printf("%s", buffContent);
-            free(buffContent);
-
-            startCluster = getNextCluster(startCluster, fp);
-            if (startCluster == FREE_CLUSTER ||
-                startCluster == RESERVED_CLUSTER ||
-                startCluster == BAD_CLUSTER ||
-                ((startCluster >= 0xFF8) && (startCluster <= 0xFFF)))
-            {
-                break;
-            }
-            else
-            {
-                fseek(fp, getAddressCluster(bs, startCluster), SEEK_SET);
-            }
-        }
-    }
-
-    return ERROR_OK;
-}
-
-*/

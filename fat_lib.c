@@ -1,16 +1,15 @@
 #include "fat_lib.h"
 #include "gui.h"
 
-static FILE *gFile = NULL;
 static dirNode_t *pHEAD = NULL;
 static BootSector_t gBootSector;
 
 error_code_t initFat(FILE *file)
 {
-    gFile = file;
+    HAL_intit(file);
     pHEAD = NULL;
     init(&pHEAD, 0);
-    read_boot_sector(gFile, &gBootSector);
+    read_boot_sector(&gBootSector);
     return ERROR_OK;
 }
 
@@ -20,13 +19,14 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
     DirectoryEntry_t entry;
     if (pHEAD->clusterEntry == 0)
     {
-        fseek(gFile, getRootDirStart(&gBootSector), SEEK_SET);
+
+        HAL_fseek(getRootDirStart(&gBootSector));
 
         int i;
         headerTableCallback();
         for (i = 0; i < gBootSector.rootEntryCount; i++)
         {
-            status = getEntryInRoot(gFile, &gBootSector, &entry);
+            status = getEntryInRoot(&gBootSector, &entry);
 
             if (entry.name[0] == 0x00)
             {
@@ -50,13 +50,13 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
     else
     {
         uint16_t tempCluster = pHEAD->clusterEntry;
-        fseek(gFile, getAddressCluster(&gBootSector, tempCluster), SEEK_SET);
+        HAL_fseek(getAddressCluster(&gBootSector, tempCluster));
         int i;
         headerTableCallback();
         uint16_t numberOfEntry = (gBootSector.bytesPerSector * gBootSector.sectorsPerCluster) / (sizeof(DirectoryEntry_t));
         for (i = 0; i < numberOfEntry; i++)
         {
-            getEntry(gFile, &gBootSector, &entry);
+            getEntry(&gBootSector, &entry);
             if (entry.name[0] == 0x00)
             {
                 continue;
@@ -77,7 +77,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
 
             if (i == numberOfEntry)
             {
-                tempCluster = getNextCluster(tempCluster, gFile);
+                tempCluster = getNextCluster(tempCluster);
                 if (tempCluster == FREE_CLUSTER ||
                     tempCluster == RESERVED_CLUSTER ||
                     tempCluster == BAD_CLUSTER ||
@@ -120,7 +120,7 @@ error_code_t changeDirectory(char *dir)
         }
         else
         {
-            status = findNameInRoot(gFile, &gBootSector, dir, &entry, FOLDER_ATTRIBUTE_TYPE);
+            status = findNameInRoot(&gBootSector, dir, &entry, FOLDER_ATTRIBUTE_TYPE);
             if (status == ERROR_OK)
             {
                 addEntry(&pHEAD, entry.startCluster);
@@ -134,7 +134,7 @@ error_code_t changeDirectory(char *dir)
             status = goPrevDirectory();
         }
         else {
-            status = findName(gFile, &gBootSector, dir, pHEAD->clusterEntry, &entry, FOLDER_ATTRIBUTE_TYPE);
+            status = findName(&gBootSector, dir, pHEAD->clusterEntry, &entry, FOLDER_ATTRIBUTE_TYPE);
             if (status == ERROR_OK)
             {
                 addEntry(&pHEAD, entry.startCluster);
@@ -168,10 +168,10 @@ error_code_t showFileContent(char *filename)
     DirectoryEntry_t entry;
     if (pHEAD->clusterEntry == 0)
     {
-        status = findNameInRoot(gFile, &gBootSector, filename, &entry, FILE_ATTRIBUTE_TYPE);
+        status = findNameInRoot(&gBootSector, filename, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
-            readFile(gFile, &gBootSector, entry.startCluster, &entry);
+            readFile(&gBootSector, entry.startCluster, &entry);
         }
         else
         {
@@ -180,10 +180,10 @@ error_code_t showFileContent(char *filename)
     }
     else
     {
-        status = findName(gFile, &gBootSector, filename, pHEAD->clusterEntry, &entry, FILE_ATTRIBUTE_TYPE);
+        status = findName(&gBootSector, filename, pHEAD->clusterEntry, &entry, FILE_ATTRIBUTE_TYPE);
         if (status == ERROR_OK)
         {
-            readFile(gFile, &gBootSector, entry.startCluster, &entry);
+            readFile(&gBootSector, entry.startCluster, &entry);
         }
         else
         {

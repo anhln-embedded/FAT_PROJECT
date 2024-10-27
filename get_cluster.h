@@ -10,8 +10,8 @@
 
 #define addressFAT 0x200
 
-#define FILE_ATTRIBUTE_TYPE     0U
-#define FOLDER_ATTRIBUTE_TYPE   1U
+#define FILE_ATTRIBUTE_TYPE 0U
+#define FOLDER_ATTRIBUTE_TYPE 1U
 
 #define ATTR_DIRECTORY 0x10 // folder
 #define ATTR_FILE 0x20      // file
@@ -28,18 +28,18 @@ typedef enum ERROR_TABLE_FAT
     EOF_CLUSTER = 0xfff
 } ERROR_FAT;
 
-uint16_t getNextCluster(uint16_t startCluster, FILE *file);
+uint16_t getNextCluster(uint16_t startCluster);
 uint32_t getAddressCluster(const BootSector_t *bs, uint32_t startCluster);
 
-error_code_t getEntry(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut);
-error_code_t findName(FILE *fp, 
-                      const BootSector_t *bs, 
-                      char *filename, 
-                      uint16_t startCluster, 
-                      DirectoryEntry_t *entryOut,
-                      uint8_t attribute);
-error_code_t readFile(FILE *fp, const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry);
+error_code_t getEntry(const BootSector_t *bs, DirectoryEntry_t *entryOut);
 
-// void FindFolderInfor(uint16_t startCluster, char fileName, uint16_t *nextStartCluster);
+error_code_t findName(
+    const BootSector_t *bs,
+    char *filename,
+    uint16_t startCluster,
+    DirectoryEntry_t *entryOut,
+    uint8_t attribute);
+
+error_code_t readFile(const BootSector_t *bs, uint16_t startCluster, DirectoryEntry_t *entry);
 
 #endif

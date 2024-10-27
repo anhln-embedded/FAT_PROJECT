@@ -18,20 +18,21 @@ extern "C"
 #include <stdint.h>
 #include <string.h>
 #include "error_codes.h"
+#include "hal.h"
 
-#define FILE_ATTRIBUTE_TYPE     0U
-#define FOLDER_ATTRIBUTE_TYPE   1U
+#define FILE_ATTRIBUTE_TYPE 0U
+#define FOLDER_ATTRIBUTE_TYPE 1U
 
-#define ATTR_READ_ONLY  0x01 /*Read only*/
-#define ATTR_HIDDEN     0x02 /*Hidden*/
-#define ATTR_SYSTEM     0x04 /*System*/
-#define ATTR_VOLUME_ID  0x08 /*Volume ID*/
-#define ATTR_DIRECTORY  0x10 /*Directory*/
-#define ATTR_ARCHIVE    0x20 /*Archive*/
-#define ATTR_LONG_NAME  0x0F /*long file name*/
+#define ATTR_READ_ONLY 0x01 /*Read only*/
+#define ATTR_HIDDEN 0x02    /*Hidden*/
+#define ATTR_SYSTEM 0x04    /*System*/
+#define ATTR_VOLUME_ID 0x08 /*Volume ID*/
+#define ATTR_DIRECTORY 0x10 /*Directory*/
+#define ATTR_ARCHIVE 0x20   /*Archive*/
+#define ATTR_LONG_NAME 0x0F /*long file name*/
 
 /**/
-#pragma pack(1) 
+#pragma pack(1)
 
     typedef struct
     {
@@ -79,16 +80,17 @@ extern "C"
 
 #pragma pack()
 
+    error_code_t read_boot_sector(BootSector_t *bs);
+    uint16_t getRootDirStart(const BootSector_t *bs);
+    error_code_t getEntryInRoot(const BootSector_t *bs, DirectoryEntry_t *entryOut);
 
-error_code_t read_boot_sector(FILE *fp, BootSector_t *bs);
-uint16_t getRootDirStart(const BootSector_t *bs);
-error_code_t getEntryInRoot(FILE *fp, const BootSector_t *bs, DirectoryEntry_t *entryOut);
-error_code_t findNameInRoot(FILE *fp, 
-                            const BootSector_t *bs, 
-                            char *filename, 
-                            DirectoryEntry_t *entryOput,
-                            uint8_t attribute);
-int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
+    error_code_t findNameInRoot(
+        const BootSector_t *bs,
+        char *filename,
+        DirectoryEntry_t *entryOput,
+        uint8_t attribute);
+
+    int8_t compareFileName(DirectoryEntry_t *entryOput, const char *filename);
 
 #ifdef __cplusplus
 }
