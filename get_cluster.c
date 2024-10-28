@@ -178,8 +178,9 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
         fatOffset = ((cluster - 1) * 3) / 2;
     }
 
+    
+    HAL_fseek(bs->reservedSectors + fatOffset);   // Write FAT1
     uint8_t fatEntry[3]; /* Read 3 bytes to handle 2 FAT12 entries */
-    HAL_fseek(bs->reservedSectors + fatOffset);
     HAL_fread(fatEntry, sizeof(uint8_t), 3);
 
     if (cluster % 2 == 0)

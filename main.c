@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    FILE *fp = fopen(argv[1], "r+");
+    FILE *fp = fopen(argv[1], "rb+");
     if (fp == NULL)
     {
         perror("Error opening file");
