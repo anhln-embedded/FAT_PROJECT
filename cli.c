@@ -150,7 +150,7 @@ void cmdLineInterface(void)
     {
         strcpy(input, "");
         strcpy(command, "");
-        printf("Group 1%s$ ", current_path);
+        printf("\033[31mT\033[32me\033[33ma\033[34mm\033[35m \033[36m1\033[0m%s$ ", current_path);
 
         fgets(input, MAX_INPUT, stdin);
         input[strcspn(input, "\n")] = '\0';

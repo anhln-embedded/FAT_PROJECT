@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define YELLOW "\033[1;32m"
+#define RESET "\033[0m"
+
 /*******************************************************************************
 * Variables
 ******************************************************************************/
@@ -33,28 +36,28 @@ void printCentered(const char *str, int width)
 void printHeader(void)
 {
     /* Print the table header */
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+    printf(YELLOW "+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n" RESET,
            nameWidth, "-----------------------------------",
            typeWidth, "------",
            timeWidth, "-----------",
            dateWidth, "-----------",
            /* startClusterWidth, "---------------", */
            fileSizeWidth, "-----------");
-    printf("| ");
+    printf(YELLOW "| " RESET);
     printCentered("Name", nameWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     printCentered("Type", typeWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     printCentered("Time", timeWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     printCentered("Date", dateWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     /* printCentered("Start Cluster", startClusterWidth); */
     /* printf(" | "); */
     printCentered("File Size", fileSizeWidth);
-    printf(" |\n");
+    printf(YELLOW " |\n" RESET);
 
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+    printf(YELLOW "+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n" RESET,
            nameWidth, "-----------------------------------",
            typeWidth, "------",
            timeWidth, "-----------",
@@ -94,21 +97,21 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
     day = entry->date.day;
 
     /* Print the values */
-    printf("| ");
+    printf(YELLOW "| " RESET);
     printCentered(fileName, nameWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     char typeStr[7];
     snprintf(typeStr, sizeof(typeStr), "%s", (entry->attr & ATTR_DIRECTORY) ? "Folder" : "File");
     printCentered(typeStr, typeWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     char timeStr[9];
     snprintf(timeStr, sizeof(timeStr), "%02d:%02d:%02d", hours, minutes, seconds);
     printCentered(timeStr, timeWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     char dateStr[11];
     snprintf(dateStr, sizeof(dateStr), "%02d/%02d/%04d", day, month, year);
     printCentered(dateStr, dateWidth);
-    printf(" | ");
+    printf(YELLOW " | " RESET);
     /* char startClusterStr[14]; */
     /* snprintf(startClusterStr, sizeof(startClusterStr), "%u", entry->startCluster); */
     /* printCentered(startClusterStr, startClusterWidth); */
@@ -116,10 +119,10 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
     char fileSizeStr[10];
     snprintf(fileSizeStr, sizeof(fileSizeStr), "%u", entry->fileSize);
     printCentered(fileSizeStr, fileSizeWidth);
-    printf(" |\n");
+    printf(YELLOW " |\n" RESET);
 
     /* Print the table footer */
-    printf("+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n",
+    printf(YELLOW "+-%-*s-+-%-*s-+-%-*s-+-%-*s-+-%-*s-+\n" RESET,
            nameWidth, "-----------------------------------",
            typeWidth, "------",
            timeWidth, "-----------",
@@ -130,13 +133,13 @@ void printDirectoryEntry(const DirectoryEntry_t *entry)
 
 void printHelp(void)
 {
-    printf("+------------------+---------------------------------------------+\n");
-    printf("|     Command      |                 Description                 |\n");
-    printf("+------------------+---------------------------------------------+\n");
-    printf("| ls               | List files in the current directory         |\n");
-    printf("| ls -a            | List all files, including hidden files      |\n");
-    printf("| cd <dir>         | Change the current directory to <dir>       |\n");
-    printf("| cat <file>       | Display the contents of <file>              |\n");
-    printf("| exit             | Exit the terminal or command line interface |\n");
-    printf("+------------------+---------------------------------------------+\n");
+    printf(YELLOW "+------------------+---------------------------------------------+\n" RESET);
+    printf(YELLOW "|     Command      |                 Description                 |\n" RESET);
+    printf(YELLOW "+------------------+---------------------------------------------+\n" RESET);
+    printf(YELLOW "| ls               | List files in the current directory         |\n" RESET);
+    printf(YELLOW "| ls -a            | List all files, including hidden files      |\n" RESET);
+    printf(YELLOW "| cd <dir>         | Change the current directory to <dir>       |\n" RESET);
+    printf(YELLOW "| cat <file>       | Display the contents of <file>              |\n" RESET);
+    printf(YELLOW "| exit             | Exit the terminal or command line interface |\n" RESET);
+    printf(YELLOW "+------------------+---------------------------------------------+\n" RESET);
 }

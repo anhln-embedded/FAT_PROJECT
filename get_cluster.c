@@ -121,7 +121,7 @@ error_code_t readFile(const BootSector_t *bs, DirectoryEntry_t *entry)
         int i;
         for (i = 0; i < bs->bytesPerSector && bytesRead < entry->fileSize; ++i)
         {
-            printf("%c", buffer[i]);
+            printf("\033[0;31m%c\033[0m", buffer[i]);
             bytesRead++;
         }
         printf("\n");
