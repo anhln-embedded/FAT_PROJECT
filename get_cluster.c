@@ -178,9 +178,8 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
         fatOffset = ((cluster - 1) * 3) / 2;
     }
 
-    
-    HAL_fseek(bs->reservedSectors + fatOffset);   // Write FAT1
-    uint8_t fatEntry[3]; /* Read 3 bytes to handle 2 FAT12 entries */
+    HAL_fseek(bs->reservedSectors + fatOffset); // Write FAT1
+    uint8_t fatEntry[3];                        /* Read 3 bytes to handle 2 FAT12 entries */
     HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
     HAL_fread(fatEntry, sizeof(uint8_t), 3);
 
@@ -231,5 +230,34 @@ uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t
 
 error_code_t freeClusterUsed(uint32_t cluster, const BootSector_t *bs)
 {
+    uint32_t fatOffset;
+    if (cluster % 2 == 0)
+    {
+        fatOffset = (cluster * 3) / 2;
+    }
+    else
+    {
+        fatOffset = ((cluster - 1) * 3) / 2;
+    }
+
+    HAL_fseek(bs->reservedSectors + fatOffset); // Write FAT1
+    uint8_t fatEntry[3];                        /* Read 3 bytes to handle 2 FAT12 entries */
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
+    HAL_fread(fatEntry, sizeof(uint8_t), 3);
+
+    if (cluster % 2 == 0)
+    {
+        fatEntry[0] = 0x00;
+        fatEntry[1] = fatEntry[1] & 0xF0;
+    }
+    else
+    {
+        fatEntry[1] = fatEntry[1] & 0x0F;
+        fatEntry[2] = 0x00;
+    }
+
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
+    HAL_fwrite(fatEntry, sizeof(uint8_t), 3);
+
     return ERROR_OK;
 }
