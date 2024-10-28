@@ -71,7 +71,7 @@ error_code_t findName(
             {
                 continue;
             }
-            if (entryOut->name[0] != 0xE5)
+            if (entryOut->name[0] != (char)0xE5)
             {
                 if (compareFileName(entryOut, filename))
                 {
@@ -121,7 +121,7 @@ error_code_t readFile(const BootSector_t *bs, DirectoryEntry_t *entry)
         int i;
         for (i = 0; i < bs->bytesPerSector && bytesRead < entry->fileSize; ++i)
         {
-            printf("%c", buffer[i]);
+            printf("\033[0;31m%c\033[0m", buffer[i]);
             bytesRead++;
         }
         printf("\n");
@@ -181,6 +181,7 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
     
     HAL_fseek(bs->reservedSectors + fatOffset);   // Write FAT1
     uint8_t fatEntry[3]; /* Read 3 bytes to handle 2 FAT12 entries */
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
     HAL_fread(fatEntry, sizeof(uint8_t), 3);
 
     if (cluster % 2 == 0)
@@ -194,7 +195,7 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
         fatEntry[2] = 0xFF;
     }
 
-    HAL_fseek(bs->reservedSectors + fatOffset);
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
     HAL_fwrite(fatEntry, sizeof(uint8_t), 3);
 
     return ERROR_OK;
@@ -226,4 +227,9 @@ uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t
     }
 
     return 1; /// OK
+}
+
+error_code_t freeClusterUsed(uint32_t cluster, const BootSector_t *bs)
+{
+    return ERROR_OK;
 }

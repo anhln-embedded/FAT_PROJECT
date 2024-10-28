@@ -44,7 +44,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
                 continue;
             }
 
-            if ((entry.name[0] != 0xE5) && (entry.startCluster != 0))
+            if ((entry.name[0] != (char)0xE5) && (entry.startCluster != 0))
             {
                 if (showHidden || !(entry.attr & ATTR_HIDDEN))
                 {
@@ -73,7 +73,7 @@ error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCa
                 continue;
             }
 
-            if (entry.name[0] != 0xE5)
+            if (entry.name[0] != (char)0xE5)
             {
                 if (showHidden || (!(entry.attr & ATTR_HIDDEN) && i > 1))
                 {
@@ -215,7 +215,7 @@ error_code_t createFolder(char *dir)
     }
     else
     {
-        printf("Cluster: %x\n", cluster);
+        printf("Cluster----: %x\n", cluster);
         markClusterUsed(cluster, &s_gBootSector);
     }
 
@@ -237,26 +237,82 @@ error_code_t createFolder(char *dir)
 
     if (s_pHEAD->prev == NULL)
     {
-        
+
         HAL_fseek(getRootDirStart(&s_gBootSector));
         int i;
         for (i = 0; i < s_gBootSector.rootEntryCount; i++)
         {
             DirectoryEntry_t temp;
             getEntryInRoot(&s_gBootSector, &temp);
-            if (temp.name[0] == 0x00 || temp.name[0] == 0xE5)
+            if (temp.name[0] == 0x00 || temp.name[0] == (char)0xE5)
             {
                 HAL_fseek(getRootDirStart(&s_gBootSector) + i * sizeof(DirectoryEntry_t));
-                if(HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1) != 1)
+                if (HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1) != 1)
                 {
                     return ERROR_WRITE_FAILURE;
                 }
+
+
+                /*
+                    - Di đi đên vùng ghi data của cluster mới
+                    - Ghi dữ liệu vào cluster mới
+                    - Thư muc "." va ".." cua cluster moi
+                */
+
                 return ERROR_OK;
             }
         }
     }
     else
     {
+        /*
+            - Di den vung ghi data cua cluster
+            - Ghi dữ liệu vào cluster mới
+            - Thư muc "." va ".." cua cluster moi
+        */
     }
     return ERROR_UNKNOWN;
+}
+
+error_code_t deleteFolder(char *dir)
+{
+    error_code_t status = ERROR_DELETE_FOLDER;
+    DirectoryEntry_t entry;
+    if (s_pHEAD->clusterEntry == 0)
+    {
+        HAL_fseek(getRootDirStart(&s_gBootSector));
+        int i;
+        for (i = 0; i < s_gBootSector.rootEntryCount; i++)
+        {
+            getEntryInRoot(&s_gBootSector, &entry);
+            if(entry.name[0] == 0x00){
+                continue;
+            }
+            if(compareFileName(&entry, dir)){
+                if(entry.attr == ATTR_DIRECTORY){
+                    entry.name[0] = 0xE5U;
+                    HAL_fseek(getRootDirStart(&s_gBootSector) + i * sizeof(DirectoryEntry_t));
+                    if(HAL_fwrite(&entry, sizeof(DirectoryEntry_t), 1) != 1){
+                        return ERROR_WRITE_FAILURE;
+                    }
+
+                    /*
+                        - Di den vung ghi data cua cluster
+                        - Đệ quy xóa tất cả các entry trong cluster
+                        - Giải phóng cluster
+                    */
+                    return ERROR_OK;
+                }
+            }
+        }
+    }
+    else
+    {
+        /*
+            - Di den vung ghi data cua cluster
+            - Đệ quy xóa tất cả các entry trong cluster
+            - Giải phóng cluster
+        */
+    }
+    return status;
 }
