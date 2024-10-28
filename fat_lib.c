@@ -215,7 +215,7 @@ error_code_t createFolder(char *dir)
     }
     else
     {
-        printf("Cluster: %d\n", cluster);
+        printf("Cluster----: %x\n", cluster);
         markClusterUsed(cluster, &s_gBootSector);
     }
 

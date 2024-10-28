@@ -179,7 +179,7 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
     }
 
     uint8_t fatEntry[3]; /* Read 3 bytes to handle 2 FAT12 entries */
-    HAL_fseek(bs->reservedSectors + fatOffset);
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
     HAL_fread(fatEntry, sizeof(uint8_t), 3);
 
     if (cluster % 2 == 0)
@@ -193,7 +193,7 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
         fatEntry[2] = 0xFF;
     }
 
-    HAL_fseek(bs->reservedSectors + fatOffset);
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
     HAL_fwrite(fatEntry, sizeof(uint8_t), 3);
 
     return ERROR_OK;
