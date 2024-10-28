@@ -14,15 +14,13 @@
 #define DIR_NODE_STATUS_ROOT_DIR_ONLY 4U
 #define DIR_NODE_STATUS_NOT_NULL 5U
 
-typedef struct dir_node dirNode_t;
 typedef uint8_t dirNodeStatus_t;
 
-struct dir_node
+typedef struct dir_node
 {
-    dirNode_t *prev;
+    struct dir_node *prev;
     uint16_t clusterEntry;
-    /* dirNode_t *next; */
-};
+} dirNode_t;
 
 /*******************************************************************************
  * API
