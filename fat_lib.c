@@ -273,6 +273,7 @@ error_code_t createFolder(char *dir)
     }
     else
     {
+        
         uint32_t currentCluster = s_pHEAD->clusterEntry;
         DirectoryEntry_t temp;
         do
@@ -286,11 +287,8 @@ error_code_t createFolder(char *dir)
                 {
                     return ERROR_READ_FAILURE;
                 }
-                if (compareFileName(&temp, ".") == 1 || compareFileName(&temp, "..") == 1)
-                {
-                    continue;
-                }
-                else if (compareFileName(&temp, dir) == 1 )
+
+                if (compareFileName(&temp, dir) == 1 )
                 {
                     freeClusterUsed(entry.startCluster, &s_gBootSector);
                     return ERROR_INVALID_NAME;
