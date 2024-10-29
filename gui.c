@@ -140,6 +140,7 @@ void printHelp(void)
     printf(YELLOW "| ls -a            | List all files, including hidden files      |\n" RESET);
     printf(YELLOW "| cd <dir>         | Change the current directory to <dir>       |\n" RESET);
     printf(YELLOW "| cat <file>       | Display the contents of <file>              |\n" RESET);
+    printf(YELLOW "| mkdir <dir>      | Create a new directory named <dir>          |\n" RESET);
     printf(YELLOW "| exit             | Exit the terminal or command line interface |\n" RESET);
     printf(YELLOW "+------------------+---------------------------------------------+\n" RESET);
 }
