@@ -87,6 +87,8 @@ error_code_t goPrevDirectory(void);
 error_code_t copyDirectory(dirNode_t **dest);
 
 error_code_t createFolder(char *dir);
+error_code_t deleteFolder(char *dir);
+error_code_t deleteFile(char* filename);
 
 /**
  * @brief Restore the directory from the source.

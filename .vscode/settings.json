@@ -57,10 +57,12 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
+    "*.ejs": "html",
     "get_cluster.h": "c",
     "fat_lib.h": "c",
     "read_infor.h": "c",
     "error_codes.h": "c",
-    "dirnode.h": "c"
+    "dirnode.h": "c",
+    "time.h": "c"
   }
 }

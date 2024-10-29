@@ -113,7 +113,6 @@ error_code_t getEntryInRoot(const BootSector_t *bs, DirectoryEntry_t *entryOut);
  * @return Error code.
  */
 error_code_t findNameInRoot(const BootSector_t *bs, char *filename, DirectoryEntry_t *entryOut, uint8_t attribute);
-
 /**
  * @brief Compare the filename with the directory entry name.
  * 

@@ -131,14 +131,19 @@ void test_cat(char *file_name)
 
 void test_mkdir(char *dir_name)
 {
-    printf("Creating: %s\n", dir_name);
     printf("%s\n", get_error_message(createFolder(dir_name)));
-    printf("Directory created\n");
 }
 
 void test_rm(char *target)
 {
     printf("Removing: %s\n", target);
+    printf("%s\n", get_error_message(deleteFile(target)));
+}
+
+void test_rmdir(char *target)
+{
+    printf("Removing: %s\n", target);
+    printf("%s\n", get_error_message(deleteFolder(target)));
 }
 
 void cmdLineInterface(void)
@@ -149,7 +154,7 @@ void cmdLineInterface(void)
     {
         strcpy(input, "");
         strcpy(command, "");
-        printf("Group 1%s$ ", current_path);
+        printf("\033[31mT\033[32me\033[33ma\033[34mm\033[35m \033[36m1\033[0m%s$ ", current_path);
 
         fgets(input, MAX_INPUT, stdin);
         input[strcspn(input, "\n")] = '\0';
@@ -211,6 +216,17 @@ void cmdLineInterface(void)
             else
             {
                 test_rm(argument);
+            }
+        }
+        else if (strcmp(command, "rmdir") == 0)
+        {
+            if (strlen(argument) == 0)
+            {
+                printf("Error: 'rm' requires a file or directory name argument\n");
+            }
+            else
+            {
+                test_rmdir(argument);
             }
         }
         else if (strcmp(command, "cat") == 0)

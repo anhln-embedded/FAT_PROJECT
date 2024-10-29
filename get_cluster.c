@@ -71,7 +71,7 @@ error_code_t findName(
             {
                 continue;
             }
-            if (entryOut->name[0] != 0xE5)
+            if (entryOut->name[0] != (char)0xE5)
             {
                 if (compareFileName(entryOut, filename))
                 {
@@ -121,7 +121,7 @@ error_code_t readFile(const BootSector_t *bs, DirectoryEntry_t *entry)
         int i;
         for (i = 0; i < bs->bytesPerSector && bytesRead < entry->fileSize; ++i)
         {
-            printf("%c", buffer[i]);
+            printf("\033[0;31m%c\033[0m", buffer[i]);
             bytesRead++;
         }
         printf("\n");
@@ -167,12 +167,20 @@ uint32_t findFreeCluster(const BootSector_t *bs)
 }
 
 error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
-{   
-    uint32_t fatOffset = (cluster * 3) / 2;
-    uint32_t fatSector = bs->reservedSectors + (fatOffset / bs->bytesPerSector);
-    uint32_t fatEntryOffset = fatOffset % bs->bytesPerSector;
-    uint8_t fatEntry[3]; /* Read 3 bytes to handle 2 FAT12 entries */
-    HAL_fseek(fatSector * bs->bytesPerSector + fatEntryOffset);
+{
+    uint32_t fatOffset;
+    if (cluster % 2 == 0)
+    {
+        fatOffset = (cluster * 3) / 2;
+    }
+    else
+    {
+        fatOffset = ((cluster - 1) * 3) / 2;
+    }
+
+    HAL_fseek(bs->reservedSectors + fatOffset); // Write FAT1
+    uint8_t fatEntry[3];                        /* Read 3 bytes to handle 2 FAT12 entries */
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
     HAL_fread(fatEntry, sizeof(uint8_t), 3);
 
     if (cluster % 2 == 0)
@@ -186,10 +194,10 @@ error_code_t markClusterUsed(uint32_t cluster, const BootSector_t *bs)
         fatEntry[2] = 0xFF;
     }
 
-    HAL_fseek(fatSector * bs->bytesPerSector + fatEntryOffset);
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
     HAL_fwrite(fatEntry, sizeof(uint8_t), 3);
 
-    return ERROR_OK;    
+    return ERROR_OK;
 }
 
 uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t *bs)
@@ -217,6 +225,94 @@ uint8_t changeEntryFAT(uint16_t value, uint16_t startCluster, const BootSector_t
         fatEntry[1] = value >> 4;
     }
 
-    return 1; /// OK
+    return 0; /// OK
 }
 
+error_code_t freeClusterUsed(uint32_t cluster, const BootSector_t *bs)
+{
+    uint32_t fatOffset;
+    if (cluster % 2 == 0)
+    {
+        fatOffset = (cluster * 3) / 2;
+    }
+    else
+    {
+        fatOffset = ((cluster - 1) * 3) / 2;
+    }
+
+    HAL_fseek(bs->reservedSectors + fatOffset); // Write FAT1
+    uint8_t fatEntry[3];                        /* Read 3 bytes to handle 2 FAT12 entries */
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
+    HAL_fread(fatEntry, sizeof(uint8_t), 3);
+
+    if (cluster % 2 == 0)
+    {
+        fatEntry[0] = 0x00;
+        fatEntry[1] = fatEntry[1] & 0xF0;
+    }
+    else
+    {
+        fatEntry[1] = fatEntry[1] & 0x0F;
+        fatEntry[2] = 0x00;
+    }
+
+    HAL_fseek(bs->reservedSectors * bs->bytesPerSector + fatOffset);
+    HAL_fwrite(fatEntry, sizeof(uint8_t), 3);
+
+    return ERROR_OK;
+}
+
+error_code_t checkFolder(DirectoryEntry_t* entryOut)
+{
+    if (entryOut->name[0] == 0x00)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    if (entryOut->name[0] != (char)0xE5)
+    {
+        if (entryOut->attr == ATTR_DIRECTORY)
+        {
+            return ERROR_OK;
+        }
+    }
+    return ERROR_FILE_NOT_FOUND;
+}
+
+error_code_t checkFolderExist(const BootSector_t *bs,
+    uint32_t startCluster,
+    DirectoryEntry_t *entryOut)
+{
+    HAL_fseek(getAddressCluster(bs, startCluster));
+    int i;
+    for (i = 0; i < bs->rootEntryCount; i++)
+    {
+        if (getEntry(bs, entryOut) != ERROR_OK)
+        {
+            return ERROR_INVALID_NAME;
+        }
+        else
+        {
+            if (checkFolder(entryOut) == ERROR_OK)
+            {
+                error_code_t folderStatus = checkFolderExist(bs, entryOut->startCluster, entryOut);
+                if (folderStatus == ERROR_OK)
+                {
+                    continue;
+                }
+            }
+            else {
+                continue;
+            }
+        }
+    }
+    startCluster = getNextCluster(bs, startCluster);
+    if (startCluster == 0)
+    {
+        return ERROR_INVALID_NAME;
+    }
+    else
+    {
+        checkFolderExist(bs, startCluster, entryOut);
+    }
+    return ERROR_OK;
+}

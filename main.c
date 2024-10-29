@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    FILE *fp = fopen(argv[1], "rb");
+    FILE *fp = fopen(argv[1], "r+b");
     if (fp == NULL)
     {
         perror("Error opening file");
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    cmdLineInterface();
+        cmdLineInterface();
 
     fclose(fp);
     return 0;
