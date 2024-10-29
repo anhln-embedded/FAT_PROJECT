@@ -220,7 +220,6 @@ error_code_t createFolder(char *dir)
     }
     else
     {
-        printf("Cluster: %x\n", cluster);
         markClusterUsed(cluster, &s_gBootSector);
     }
     entry.startCluster = cluster;
@@ -233,6 +232,11 @@ error_code_t createFolder(char *dir)
         {
             DirectoryEntry_t temp;
             getEntryInRoot(&s_gBootSector, &temp);
+            if (compareFileName(&temp, dir))
+            {
+                freeClusterUsed(entry.startCluster, &s_gBootSector);
+                return ERROR_INVALID_NAME;
+            }
             if (temp.name[0] == 0x00 || temp.name[0] == (char)0xE5)
             {
                 HAL_fseek(getRootDirStart(&s_gBootSector) + i * sizeof(DirectoryEntry_t));
@@ -285,6 +289,11 @@ error_code_t createFolder(char *dir)
                 if (compareFileName(&temp, ".") == 1 || compareFileName(&temp, "..") == 1)
                 {
                     continue;
+                }
+                else if (compareFileName(&temp, dir) == 1 )
+                {
+                    freeClusterUsed(entry.startCluster, &s_gBootSector);
+                    return ERROR_INVALID_NAME;
                 }
                 else
                 {
@@ -352,7 +361,6 @@ error_code_t deleteFolder(char *dir)
                     {
                         return ERROR_WRITE_FAILURE;
                     }
-                    printf("Cluster----: %x\n", entry.startCluster);
                     freeClusterUsed(entry.startCluster, &s_gBootSector);
                     /*
                         - Di den vung ghi data cua cluster
