@@ -9,11 +9,23 @@
 ******************************************************************************/
 
 /**
- * @brief Initialize the HAL with a given stream.
- * 
+ * * 
+
  * @param stream Pointer to the file stream.
+
+  *void HAL_init(char *stream); * @param stream Pointer to the file stream.
  */
-void HAL_init(FILE *stream);
+void HAL_init(char *stream);
+
+
+/**
+ * @brief Deinitializes the Hardware Abstraction Layer (HAL).
+ *
+ * This function is responsible for deinitializing or shutting down the 
+ * Hardware Abstraction Layer, ensuring that all hardware resources are 
+ * properly released and any necessary cleanup is performed.
+ */
+void HAL_deinit(void);
 
 /**
  * @brief Read data from the HAL.

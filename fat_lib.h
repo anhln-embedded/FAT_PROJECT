@@ -36,7 +36,7 @@ typedef void (*helpCallback)(void);
  * @param file Pointer to the file.
  * @return Error code.
  */
-error_code_t initFat(FILE *file);
+error_code_t initFat(char *file);
 
 /**
  * @brief List the directory contents.
@@ -96,5 +96,6 @@ error_code_t deleteFolder(char *dir);
  */
 void restoreDirectory(dirNode_t **source);
 
+void deinintFat(void);
 
 #endif /* _FAT_LIB_H_ */

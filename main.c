@@ -12,23 +12,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    FILE *fp = fopen(argv[1], "r+b");
-    if (fp == NULL)
+    error_code_t status = initFat(argv[1]);
+    if(status != ERROR_OK)
     {
-        perror("Error opening file");
+        fprintf(stderr, "Error: Unable to initialize FAT library\n");
+        deinintFat();
         return 1;
     }
+    cmdLineInterface();
 
-    error_code_t status = initFat(fp);
-    if (status != ERROR_OK)
-    {
-        fprintf(stderr, "Error initializing FAT: %s\n", get_error_message(status));
-        fclose(fp);
-        return 1;
-    }
-
-        cmdLineInterface();
-
-    fclose(fp);
+    deinintFat();
     return 0;
 }

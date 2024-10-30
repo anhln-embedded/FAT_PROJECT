@@ -3,14 +3,20 @@
 /*******************************************************************************
 * Variables
 ******************************************************************************/
+char *path = NULL;
 FILE *g_stream = NULL;
 
 /*******************************************************************************
 * Code
 ******************************************************************************/
-void HAL_init(FILE *stream)
+void HAL_init(char *stream)
 {
-    g_stream = stream;
+    path = stream;
+    g_stream = fopen(path, "r+b");
+    if (g_stream == NULL)
+    {
+        perror("Error opening file");
+    }
 }
 
 size_t HAL_fread(void *ptr, size_t size, size_t count)
@@ -30,4 +36,8 @@ char HAL_fgetc(void)
 
 size_t HAL_fwrite(const void *ptr, size_t size, size_t count){
     return fwrite(ptr, size, count, g_stream);
+}
+
+void HAL_deinit(void){
+    fclose(g_stream);
 }

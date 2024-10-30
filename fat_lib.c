@@ -17,13 +17,19 @@ static void createTempFolder(char *dir, DirectoryEntry_t *entry);
 /*******************************************************************************
  * Code
  ******************************************************************************/
-error_code_t initFat(FILE *file)
+error_code_t initFat(char *file)
 {
     HAL_init(file);
     s_pHEAD = NULL;
     init(&s_pHEAD, 0);
     read_boot_sector(&s_gBootSector);
     return ERROR_OK;
+}
+
+void deinintFat(void)
+{
+    HAL_deinit();
+    deleteAllEntries(&s_pHEAD);
 }
 
 error_code_t listDirectory(uint8_t showHidden, headerTableCallback headerTableCallback, contentCallback contentCallback)
@@ -273,7 +279,7 @@ error_code_t createFolder(char *dir)
     }
     else
     {
-        
+
         uint32_t currentCluster = s_pHEAD->clusterEntry;
         DirectoryEntry_t temp;
         do
@@ -288,7 +294,7 @@ error_code_t createFolder(char *dir)
                     return ERROR_READ_FAILURE;
                 }
 
-                if (compareFileName(&temp, dir) == 1 )
+                if (compareFileName(&temp, dir) == 1)
                 {
                     freeClusterUsed(entry.startCluster, &s_gBootSector);
                     return ERROR_INVALID_NAME;
@@ -360,11 +366,6 @@ error_code_t deleteFolder(char *dir)
                         return ERROR_WRITE_FAILURE;
                     }
                     freeClusterUsed(entry.startCluster, &s_gBootSector);
-                    /*
-                        - Di den vung ghi data cua cluster
-                        - Đệ quy xóa tất cả các entry trong cluster
-                        - Giải phóng cluster
-                    */
                     return ERROR_OK;
                 }
             }
@@ -372,11 +373,37 @@ error_code_t deleteFolder(char *dir)
     }
     else
     {
-        /*
-            - Di den vung ghi data cua cluster
-            - Đệ quy xóa tất cả các entry trong cluster
-            - Giải phóng cluster
-        */
+        uint32_t currentCluster = s_pHEAD->clusterEntry;
+        DirectoryEntry_t temp;
+        do
+        {
+            HAL_fseek(getAddressCluster(&s_gBootSector, currentCluster));
+            int i;
+            int entryCount = (s_gBootSector.bytesPerSector * s_gBootSector.sectorsPerCluster) / (sizeof(DirectoryEntry_t));
+            for (i = 0; i < entryCount; i++)
+            {
+                if (HAL_fread(&temp, sizeof(DirectoryEntry_t), 1) != 1)
+                {
+                    return ERROR_READ_FAILURE;
+                }
+
+                if (compareFileName(&temp, dir) == 1)
+                {
+                    if (temp.attr == ATTR_DIRECTORY)
+                    {
+                        temp.name[0] = 0xE5U;
+                        HAL_fseek(getAddressCluster(&s_gBootSector, currentCluster) + i * sizeof(DirectoryEntry_t));
+                        if (HAL_fwrite(&temp, sizeof(DirectoryEntry_t), 1) != 1)
+                        {
+                            return ERROR_WRITE_FAILURE;
+                        }
+                        freeClusterUsed(temp.startCluster, &s_gBootSector);
+                        return ERROR_OK;
+                    }
+                }
+            }
+            currentCluster = getNextCluster(&s_gBootSector, currentCluster);
+        } while (currentCluster != 0);
     }
     return status;
 }
